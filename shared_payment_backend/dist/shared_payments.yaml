@@ -1,0 +1,297 @@
+openapi: 3.0.0
+info:
+  title: Shared Payments Specification
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: daniel.alderetecillero@gmail.com
+servers:
+  - url: 'http://localhost:8080/api/1.0.0'
+    description: Localhost (dev) server
+tags:
+  - name: Groups
+    description: Endpoints related to groups functionality
+  - name: Friends
+    description: Endpoints related to friends functionality
+  - name: Payments
+    description: Endpoints related to payments functionality
+paths:
+  /groups:
+    get:
+      tags:
+        - Groups
+      summary: Gets all groups found in DB
+      operationId: getAllGroups
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - Groups
+      summary: Creates a new group in the DB
+      operationId: createGroup
+      responses:
+        '201':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /groups/{groupId}:
+    get:
+      tags:
+        - Groups
+      summary: Gets a group found in DB
+      operationId: getGroup
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - Groups
+      summary: Updates a group found in DB
+      operationId: updateGroup
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - Groups
+      summary: Deletes a group found in DB
+      operationId: deleteGroup
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '204':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+  /groups/{groupId}/friends:
+    get:
+      tags:
+        - Friends
+      summary: Gets all friends found in DB for a group
+      operationId: getAllFriends
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - Friends
+      summary: Creates a new friend in the DB for a group
+      operationId: createFriend
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '201':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+  /groups/{groupId}/friends/{friendId}:
+    get:
+      tags:
+        - Friends
+      summary: Gets a friend found in DB for a group
+      operationId: getFriend
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/FriendId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - Friends
+      summary: Updates a friend found in DB
+      operationId: updateFriend
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/FriendId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - Friends
+      summary: Deletes a friend found in DB
+      operationId: deleteFriend
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/FriendId'
+      responses:
+        '204':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+  /groups/{groupId}/friends/{friendId}/payments:
+    get:
+      tags:
+        - Payments
+      summary: Gets all payments found in DB for a group and a friend
+      operationId: getAllPayments
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/FriendId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - Payments
+      summary: Creates a new payment in the DB for a group and a friend
+      operationId: createPayment
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/FriendId'
+      responses:
+        '201':
+          description: OK
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+  /groups/{groupId}/friends/{friendId}/payments/{paymentId}:
+    get:
+      tags:
+        - Payments
+      summary: Gets a payment found in DB for a group and a friend
+      operationId: getPayment
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/FriendId'
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - Payments
+      summary: Updates a payment found in DB
+      operationId: updatePayment
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/FriendId'
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+        - Payments
+      summary: Deletes a payment found in DB
+      operationId: deletePayment
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/FriendId'
+        - $ref: '#/components/parameters/PaymentId'
+      responses:
+        '204':
+          description: OK
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
+components:
+  parameters:
+    GroupId:
+      in: path
+      name: groupId
+      required: true
+      description: Identifier of a group
+      schema:
+        type: string
+    FriendId:
+      in: path
+      name: friendId
+      required: true
+      description: Identifier of a friend
+      schema:
+        type: string
+    PaymentId:
+      in: path
+      name: paymentId
+      required: true
+      description: Identifier of a payment
+      schema:
+        type: string
+  
