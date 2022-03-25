@@ -19,6 +19,12 @@ public abstract class AbstractGroup implements Group {
     public AbstractGroup() {
     }
 
+    public AbstractGroup(String name, String description, Set<String> friends) {
+        this.name = name;
+        this.description = description;
+        this.friends = friends;
+    }
+
     public AbstractGroup(String id, String name, String description, Set<String> friends) {
         this.id = id;
         this.name = name;

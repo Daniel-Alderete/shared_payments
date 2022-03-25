@@ -19,6 +19,12 @@ public abstract class AbstractFriend implements Friend {
     public AbstractFriend() {
     }
 
+    public AbstractFriend(String name, String surname, Set<String> payments) {
+        this.name = name;
+        this.surname = surname;
+        this.payments = payments;
+    }
+
     public AbstractFriend(String id, String name, String surname, Set<String> payments) {
         this.id = id;
         this.name = name;

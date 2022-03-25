@@ -17,6 +17,12 @@ public abstract class AbstractPayment implements Payment {
     public AbstractPayment() {
     }
 
+    public AbstractPayment(float amount, String description, int date) {
+        this.amount = amount;
+        this.description = description;
+        this.date = date;
+    }
+
     public AbstractPayment(String id, float amount, String description, int date) {
         this.id = id;
         this.amount = amount;
