@@ -25,6 +25,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupsResponse'
         '401':
           description: Unauthorized
         '500':
@@ -34,9 +38,15 @@ paths:
         - Groups
       summary: Creates a new group in the DB
       operationId: createGroup
+      requestBody:
+        $ref: '#/components/requestBodies/GroupCreation'
       responses:
         '201':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
         '400':
           description: Bad Request
         '401':
@@ -54,6 +64,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
         '401':
           description: Unauthorized
         '404':
@@ -67,9 +81,15 @@ paths:
       operationId: updateGroup
       parameters:
         - $ref: '#/components/parameters/GroupId'
+      requestBody:
+        $ref: '#/components/requestBodies/GroupUpdate'
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupResponse'
         '401':
           description: Unauthorized
         '404':
@@ -103,6 +123,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendsResponse'
         '401':
           description: Unauthorized
         '404':
@@ -116,9 +140,15 @@ paths:
       operationId: createFriend
       parameters:
         - $ref: '#/components/parameters/GroupId'
+      requestBody:
+        $ref: '#/components/requestBodies/FriendCreation'
       responses:
         '201':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendResponse'
         '400':
           description: Bad Request
         '401':
@@ -139,6 +169,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendResponse'
         '401':
           description: Unauthorized
         '404':
@@ -153,9 +187,15 @@ paths:
       parameters:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
+      requestBody:
+        $ref: '#/components/requestBodies/FriendUpdate'
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FriendResponse'
         '401':
           description: Unauthorized
         '404':
@@ -191,6 +231,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentsResponse'
         '401':
           description: Unauthorized
         '404':
@@ -205,9 +249,15 @@ paths:
       parameters:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentCreation'
       responses:
         '201':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
         '400':
           description: Bad Request
         '401':
@@ -229,6 +279,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
         '401':
           description: Unauthorized
         '404':
@@ -244,9 +298,15 @@ paths:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
         - $ref: '#/components/parameters/PaymentId'
+      requestBody:
+        $ref: '#/components/requestBodies/PaymentUpdate'
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
         '401':
           description: Unauthorized
         '404':
@@ -294,4 +354,249 @@ components:
       description: Identifier of a payment
       schema:
         type: string
+  responses:
+    ThirdPartyError:
+      description: >
+        'Used to provide more information about an http status code error; i.e.
+        a 404 produced by a friend or a payment not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MoreThanOneErrorResponse'
+  requestBodies:
+    PaymentCreation:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaymentUpdate'
+              - required:
+                  - amount
+                  - description
+                  - date
+      description: Contains the data required for creating a payment
+      required: true
+    PaymentUpdate:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/PaymentUpdate'
+              - required:
+                  - amount
+                  - description
+                  - date
+      description: Contains the data required for updating a payment
+    FriendCreation:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/FriendUpdate'
+              - required:
+                  - name
+                  - surname
+                  - payments
+      description: Contains the data required for creating a friend
+      required: true
+    FriendUpdate:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/FriendUpdate'
+              - required:
+                  - name
+                  - surname
+                  - payments
+      description: Contains the data required for updating a friend
+    GroupCreation:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/GroupUpdate'
+              - required:
+                  - name
+                  - description
+                  - friends
+      description: Contains the data required for creating a group
+      required: true
+    GroupUpdate:
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/GroupUpdate'
+              - required:
+                  - name
+                  - description
+                  - friends
+      description: Contains the data required for updating a group
+  schemas:
+    ApiResponseSuccessful:
+      type: object
+      required:
+        - data
+        - error
+      properties:
+        error:
+          type: object
+          description: 'As the request was processed successfully, this field will be null'
+          example: null
+    ApiResponseUnsuccessful:
+      type: object
+      required:
+        - data
+        - error
+      properties:
+        data:
+          type: object
+          description: >-
+            As the request could not be processed successfully, this field will be null
+          example: null
+    MoreThanOneErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseUnsuccessful'
+        - type: object
+          properties:
+            error:
+              $ref: '#/components/schemas/MoreThanOneError'
+    MoreThanOneError:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+          example: xxx
+        message:
+          type: string
+    PaymentsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseSuccessful'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                payments:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Payment'
+    PaymentResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseSuccessful'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Payment'
+    FriendsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseSuccessful'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                friends:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Friend'
+    FriendResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseSuccessful'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Friend'
+    GroupsResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseSuccessful'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                groups:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Group'
+    GroupResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseSuccessful'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/Group'
+    Payment:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/parameters/PaymentId'
+        amount:
+          type: integer
+        description:
+          type: string
+        date:
+          type: integer
+    PaymentUpdate:
+      type: object
+      properties:
+        amount:
+          type: integer
+        description:
+          type: string
+        date:
+          type: integer
+    Friend:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/parameters/FriendId'
+        name:
+          type: string
+        surname:
+          type: string
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+    FriendUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        payments:
+          type: array
+          items:
+            description: list of payment ids
+            type: string
+    Group:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/parameters/GroupId'
+        name:
+          type: string
+        description:
+          type: string
+        friends:
+          type: array
+          items:
+            $ref: '#/components/schemas/Friend'
+    GroupUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        friends:
+          type: array
+          items:
+            description: list of friend ids
+            type: string
+    
   
