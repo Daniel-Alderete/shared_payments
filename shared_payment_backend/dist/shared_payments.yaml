@@ -112,6 +112,27 @@ paths:
           description: Not Found
         '500':
           description: Internal server error
+  /groups/{groupId}/info:
+    get:
+      tags:
+        - Groups
+      summary: Gets a group of friends debts info
+      operationId: getGroupInfo
+      parameters:
+        - $ref: '#/components/parameters/GroupId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GroupInfoResponse'
+        '401':
+          description: Unauthorized
+        '404':
+          description: Not Found
+        '500':
+          description: Internal server error
   /groups/{groupId}/friends:
     get:
       tags:
@@ -528,13 +549,20 @@ components:
           properties:
             data:
               $ref: '#/components/schemas/Group'
+    GroupInfoResponse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseSuccessful'
+        - type: object
+          properties:
+            data:
+              $ref: '#/components/schemas/GroupInfo'
     Payment:
       type: object
       properties:
         id:
           $ref: '#/components/parameters/PaymentId'
         amount:
-          type: integer
+          type: number
         description:
           type: string
         date:
@@ -543,7 +571,7 @@ components:
       type: object
       properties:
         amount:
-          type: integer
+          type: number
         description:
           type: string
         date:
@@ -598,5 +626,43 @@ components:
           items:
             description: list of friend ids
             type: string
+    GroupInfo:
+      type: object
+      properties:
+        debts:
+          type: array
+          items:
+            $ref: '#/components/schemas/Debt'
+        minimunPayments:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinimunPayments'
+    Debt:
+      type: object
+      description: total amount of money a friend owes
+      properties:
+        friendId:
+          $ref: '#/components/parameters/FriendId'
+        amount:
+          type: number
+    MinimunPayments:
+      type: object
+      description: list of friends and the quantities owed for a friend
+      properties:
+        friendId:
+          $ref: '#/components/parameters/FriendId'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/MinimunPayment'
+    MinimunPayment:
+      type: object
+      description: total amounnt of money owed to a friend
+      properties:
+        friendId:
+          $ref: '#/components/parameters/FriendId'
+        payment:
+          type: number
+        
     
   
