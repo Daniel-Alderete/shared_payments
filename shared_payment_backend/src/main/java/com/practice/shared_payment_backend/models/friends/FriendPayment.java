@@ -9,7 +9,11 @@ public class FriendPayment extends AbstractPayment {
         super();
     }
 
-    public FriendPayment(String id, float amount, String description, int date) {
+    public FriendPayment(float amount, String description, long date) {
+        super(amount, description, date);
+    }
+
+    public FriendPayment(String id, float amount, String description, long date) {
         super(id, amount, description, date);
     }
 }

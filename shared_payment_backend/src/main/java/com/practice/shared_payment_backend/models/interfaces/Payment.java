@@ -16,9 +16,9 @@ public interface Payment {
 
     void setDescription(String description);
 
-    int getDate();
+    long getDate();
 
-    void setDate(int date);
+    void setDate(long date);
 
     JsonNode asJson();
 }

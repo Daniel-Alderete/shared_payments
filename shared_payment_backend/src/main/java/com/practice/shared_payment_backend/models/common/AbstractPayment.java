@@ -12,18 +12,18 @@ public abstract class AbstractPayment implements Payment {
     protected String id;
     protected float amount;
     protected String description;
-    protected int date;
+    protected long date;
 
     public AbstractPayment() {
     }
 
-    public AbstractPayment(float amount, String description, int date) {
+    public AbstractPayment(float amount, String description, long date) {
         this.amount = amount;
         this.description = description;
         this.date = date;
     }
 
-    public AbstractPayment(String id, float amount, String description, int date) {
+    public AbstractPayment(String id, float amount, String description, long date) {
         this.id = id;
         this.amount = amount;
         this.description = description;
@@ -61,12 +61,12 @@ public abstract class AbstractPayment implements Payment {
     }
 
     @Override
-    public int getDate() {
+    public long getDate() {
         return date;
     }
 
     @Override
-    public void setDate(int date) {
+    public void setDate(long date) {
         this.date = date;
     }
 
