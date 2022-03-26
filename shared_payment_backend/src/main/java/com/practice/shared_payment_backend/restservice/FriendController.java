@@ -61,7 +61,7 @@ public class FriendController extends BaseController {
                         friendsToUpdate.add(friendRepository.findByPayments(Collections.singleton(payment.getId())));
                     });
 
-                    if (payments.isEmpty()) {
+                    if (payments.isEmpty() || request.getPayments().size() != payments.size()) {
                         logger.error("At least one payment was not found in the DB {}", request.getPayments());
                         throw new DataRetrievalFailureException("Payments not found");
                     }
@@ -104,6 +104,7 @@ public class FriendController extends BaseController {
                     paymentRepository.findAllById(friend.get().getPayments()).forEach(payments::add);
                     logger.debug("Friend {} was found with payments {}", friend.get(), payments);
 
+                    logger.info("Retrieving friend {}", friendId);
                     return new FriendResponse(friend.get(), new HashSet<>(payments));
                 } else {
                     logger.error("Friend {} was not found in DB", friendId);
@@ -122,7 +123,7 @@ public class FriendController extends BaseController {
     @PutMapping("/api/{version}/groups/{groupId}/friends/{friendId}")
     public FriendResponse updateFriend(@PathVariable String version, @PathVariable String groupId,
                                        @PathVariable String friendId, @RequestBody FriendRequest request) {
-        logger.trace("Starting with version {} and groupId {}", version, groupId);
+        logger.trace("Starting with version {}, groupId {} and friendId {}", version, groupId, friendId);
 
         if (isNotBlank(request.getName()) && isNotBlank(request.getSurname()) && request.getPayments() != null) {
             Optional<FriendGroup> group = groupRepository.findById(groupId);
@@ -135,7 +136,6 @@ public class FriendController extends BaseController {
                         Friend friend = optionalFriend.get();
                         Set<Payment> newPayments = new HashSet<>();
                         Set<Friend> friendsToUpdate = new HashSet<>();
-                        Set<String> oldPayments = friend.getPayments();
 
                         if (!request.getPayments().isEmpty()) {
                             paymentRepository.findAllById(request.getPayments()).forEach(payment -> {
@@ -143,7 +143,7 @@ public class FriendController extends BaseController {
                                 friendsToUpdate.add(friendRepository.findByPayments(Collections.singleton(payment.getId())));
                             });
 
-                            if (newPayments.isEmpty()) {
+                            if (newPayments.isEmpty() || request.getPayments().size() != newPayments.size()) {
                                 logger.error("At least one payment was not found in the DB {}", request.getPayments());
                                 throw new DataRetrievalFailureException("Payments not found");
                             }
@@ -154,9 +154,6 @@ public class FriendController extends BaseController {
                         friend.setSurname(request.getSurname());
                         friend.setPayments(request.getPayments());
                         friendRepository.save((FriendMember) friend);
-
-                        logger.trace("Deleting old friend payments");
-                        paymentRepository.deleteAllById(oldPayments);
 
                         logger.trace("Removing payment ids from friends {}", friendsToUpdate);
                         friendsToUpdate.forEach(friendToUpdate -> {

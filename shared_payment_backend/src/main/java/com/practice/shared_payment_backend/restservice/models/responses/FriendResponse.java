@@ -24,6 +24,10 @@ public class FriendResponse extends AbstractResponse {
         this.payments = payments;
     }
 
+    public FriendResponse(Friend friend) {
+        this(friend, new HashSet<>());
+    }
+
     public FriendResponse(Friend friend, Set<Payment> payments) {
         this.id = friend.getId();
         this.name = friend.getName();

@@ -26,6 +26,20 @@ public class GroupResponse extends AbstractResponse {
         this.friends = friends;
     }
 
+    public GroupResponse(Group group, Set<Friend> friends) {
+        this.id = group.getId();
+        this.name = group.getName();
+        this.description = group.getDescription();
+
+        Set<FriendResponse> responses = new HashSet<>();
+
+        for (Friend friend : friends) {
+            responses.add(new FriendResponse(friend));
+        }
+
+        this.friends = responses;
+    }
+
     public GroupResponse(Group group, Map<Friend, Set<Payment>> friendPaymentMap) {
         this.id = group.getId();
         this.name = group.getName();

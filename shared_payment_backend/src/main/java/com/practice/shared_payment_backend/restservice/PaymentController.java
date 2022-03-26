@@ -113,7 +113,7 @@ public class PaymentController extends BaseController {
                         Optional<FriendPayment> payment = paymentRepository.findById(paymentId);
 
                         if (payment.isPresent()) {
-                            logger.debug("Retrieving payment {}", paymentId);
+                            logger.info("Retrieving payment {}", paymentId);
                             return new PaymentResponse(payment.get());
                         } else {
                             logger.error("Payment {} was not found in DB", paymentId);
@@ -210,6 +210,8 @@ public class PaymentController extends BaseController {
                             currentPayments.remove(paymentId);
                             friend.get().setPayments(currentPayments);
                             friendRepository.save(friend.get());
+
+                            logger.info("Payment {} successfully deleted", paymentId);
                         } else {
                             logger.error("Payment {} was not found in DB", paymentId);
                             throw new EmptyResultDataAccessException(1);
