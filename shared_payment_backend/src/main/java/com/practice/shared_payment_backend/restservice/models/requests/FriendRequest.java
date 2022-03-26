@@ -1,8 +1,10 @@
 package com.practice.shared_payment_backend.restservice.models.requests;
 
+import com.practice.shared_payment_backend.restservice.models.common.AbstractRequest;
+
 import java.util.Set;
 
-public class FriendRequest {
+public class FriendRequest extends AbstractRequest {
 
     private String name;
     private String surname;

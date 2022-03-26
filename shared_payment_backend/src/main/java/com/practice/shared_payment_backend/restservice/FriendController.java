@@ -4,6 +4,7 @@ import com.practice.shared_payment_backend.models.friends.FriendGroup;
 import com.practice.shared_payment_backend.models.friends.FriendMember;
 import com.practice.shared_payment_backend.models.interfaces.Friend;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
+import com.practice.shared_payment_backend.restservice.common.BaseController;
 import com.practice.shared_payment_backend.restservice.models.requests.FriendRequest;
 import com.practice.shared_payment_backend.restservice.models.responses.FriendResponse;
 import org.springframework.dao.DataRetrievalFailureException;
@@ -40,6 +41,7 @@ public class FriendController extends BaseController {
         }
     }
 
+    @ResponseStatus(value = HttpStatus.CREATED, reason = "Created")
     @PostMapping("/api/{version}/groups/{groupId}/friends")
     public FriendResponse createFriend(@PathVariable String version, @PathVariable String groupId,
                                        @RequestBody FriendRequest request) {
@@ -104,7 +106,7 @@ public class FriendController extends BaseController {
 
                     return new FriendResponse(friend.get(), new HashSet<>(payments));
                 } else {
-                    logger.error("Friend {} was not found in DB", groupId);
+                    logger.error("Friend {} was not found in DB", friendId);
                     throw new EmptyResultDataAccessException(1);
                 }
             } else {
@@ -121,9 +123,10 @@ public class FriendController extends BaseController {
     public FriendResponse updateFriend(@PathVariable String version, @PathVariable String groupId,
                                        @PathVariable String friendId, @RequestBody FriendRequest request) {
         logger.trace("Starting with version {} and groupId {}", version, groupId);
-        Optional<FriendGroup> group = groupRepository.findById(groupId);
 
         if (isNotBlank(request.getName()) && isNotBlank(request.getSurname()) && request.getPayments() != null) {
+            Optional<FriendGroup> group = groupRepository.findById(groupId);
+
             if (group.isPresent()) {
                 if (group.get().getFriends().contains(friendId)) {
                     Optional<FriendMember> optionalFriend = friendRepository.findById(friendId);
@@ -163,10 +166,10 @@ public class FriendController extends BaseController {
                             friendRepository.save((FriendMember) friendToUpdate);
                         });
 
-                        logger.info("Friend correctly updated");
+                        logger.info("Friend {} correctly updated", friendId);
                         return new FriendResponse(friend, newPayments);
                     } else {
-                        logger.error("Friend {} was not found in DB", groupId);
+                        logger.error("Friend {} was not found in DB", friendId);
                         throw new EmptyResultDataAccessException(1);
                     }
                 } else {
@@ -197,8 +200,16 @@ public class FriendController extends BaseController {
                     logger.debug("Deleting friend {} with payments {}", friend.get(), friend.get().getPayments());
                     paymentRepository.deleteAllById(friend.get().getPayments());
                     friendRepository.delete(friend.get());
+
+                    logger.trace("Removing friend from group");
+                    Set<String> currentFriends = group.get().getFriends();
+                    currentFriends.remove(friendId);
+                    group.get().setFriends(currentFriends);
+                    groupRepository.save(group.get());
+
+                    logger.info("Friend {} successfully deleted", friendId);
                 } else {
-                    logger.error("Friend {} was not found in DB", groupId);
+                    logger.error("Friend {} was not found in DB", friendId);
                     throw new EmptyResultDataAccessException(1);
                 }
             } else {

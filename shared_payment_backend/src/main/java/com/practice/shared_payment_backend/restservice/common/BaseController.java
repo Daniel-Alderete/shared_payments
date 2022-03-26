@@ -1,4 +1,4 @@
-package com.practice.shared_payment_backend.restservice;
+package com.practice.shared_payment_backend.restservice.common;
 
 import com.practice.shared_payment_backend.repository.FriendRepository;
 import com.practice.shared_payment_backend.repository.GroupRepository;

@@ -1,4 +1,4 @@
-package com.practice.shared_payment_backend.restservice;
+package com.practice.shared_payment_backend.restservice.common;
 
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;

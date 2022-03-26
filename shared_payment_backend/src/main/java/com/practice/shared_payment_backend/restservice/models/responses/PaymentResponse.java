@@ -1,8 +1,9 @@
 package com.practice.shared_payment_backend.restservice.models.responses;
 
 import com.practice.shared_payment_backend.models.interfaces.Payment;
+import com.practice.shared_payment_backend.restservice.models.common.AbstractResponse;
 
-public class PaymentResponse {
+public class PaymentResponse extends AbstractResponse {
 
     private String id;
     private float amount;

@@ -2,11 +2,12 @@ package com.practice.shared_payment_backend.restservice.models.responses;
 
 import com.practice.shared_payment_backend.models.interfaces.Friend;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
+import com.practice.shared_payment_backend.restservice.models.common.AbstractResponse;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class FriendResponse {
+public class FriendResponse extends AbstractResponse {
 
     private String id;
     private String name;
