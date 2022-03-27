@@ -6,7 +6,9 @@ import com.practice.shared_payment_backend.models.friends.FriendPayment;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
 import com.practice.shared_payment_backend.restservice.common.BaseController;
 import com.practice.shared_payment_backend.restservice.models.requests.PaymentRequest;
-import com.practice.shared_payment_backend.restservice.models.responses.PaymentResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.ApiResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.payment.PaymentListResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.payment.PaymentResponse;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -23,8 +25,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class PaymentController extends BaseController {
 
     @GetMapping("/api/{version}/groups/{groupId}/friends/{friendId}/payments")
-    public List<PaymentResponse> getAllPayments(@PathVariable String version, @PathVariable String groupId,
-                                                @PathVariable String friendId) {
+    public ApiResponse getAllPayments(@PathVariable String version, @PathVariable String groupId,
+                                      @PathVariable String friendId) {
         logger.trace("Starting with version {}, groupId {} and friendId {}", version, groupId, friendId);
         Optional<FriendGroup> group = groupRepository.findById(groupId);
 
@@ -38,7 +40,7 @@ public class PaymentController extends BaseController {
                     paymentRepository.findAllById(friend.get().getPayments())
                             .forEach(payment -> response.add(new PaymentResponse(payment)));
 
-                    return response;
+                    return new ApiResponse(new PaymentListResponse(response));
                 } else {
                     logger.error("Friend {} was not found in DB", friendId);
                     throw new EmptyResultDataAccessException(1);
@@ -55,8 +57,8 @@ public class PaymentController extends BaseController {
 
     @ResponseStatus(value = HttpStatus.CREATED, reason = "Created")
     @PostMapping("/api/{version}/groups/{groupId}/friends/{friendId}/payments")
-    public PaymentResponse createPayment(@PathVariable String version, @PathVariable String groupId,
-                                         @PathVariable String friendId, @RequestBody PaymentRequest request) {
+    public ApiResponse createPayment(@PathVariable String version, @PathVariable String groupId,
+                                     @PathVariable String friendId, @RequestBody PaymentRequest request) {
 
         logger.trace("Starting with version {}, groupId {} and friendId {}", version, groupId, friendId);
 
@@ -79,7 +81,7 @@ public class PaymentController extends BaseController {
                         friendRepository.save(friend.get());
 
                         logger.info("Payment correctly created");
-                        return new PaymentResponse(payment);
+                        return new ApiResponse(new PaymentResponse(payment));
                     } else {
                         logger.error("Friend {} was not found in DB", friendId);
                         throw new EmptyResultDataAccessException(1);
@@ -99,8 +101,8 @@ public class PaymentController extends BaseController {
     }
 
     @GetMapping("/api/{version}/groups/{groupId}/friends/{friendId}/payments/{paymentId}")
-    public PaymentResponse getPayment(@PathVariable String version, @PathVariable String groupId,
-                                      @PathVariable String friendId, @PathVariable String paymentId) {
+    public ApiResponse getPayment(@PathVariable String version, @PathVariable String groupId,
+                                  @PathVariable String friendId, @PathVariable String paymentId) {
         logger.trace("Starting with version {}, groupId {}, friendId {} and paymentId {}", version, groupId, friendId, paymentId);
         Optional<FriendGroup> group = groupRepository.findById(groupId);
 
@@ -114,7 +116,7 @@ public class PaymentController extends BaseController {
 
                         if (payment.isPresent()) {
                             logger.info("Retrieving payment {}", paymentId);
-                            return new PaymentResponse(payment.get());
+                            return new ApiResponse(new PaymentResponse(payment.get()));
                         } else {
                             logger.error("Payment {} was not found in DB", paymentId);
                             throw new EmptyResultDataAccessException(1);
@@ -138,9 +140,9 @@ public class PaymentController extends BaseController {
     }
 
     @PutMapping("/api/{version}/groups/{groupId}/friends/{friendId}/payments/{paymentId}")
-    public PaymentResponse updatePayment(@PathVariable String version, @PathVariable String groupId,
-                                         @PathVariable String friendId, @PathVariable String paymentId,
-                                         @RequestBody PaymentRequest request) {
+    public ApiResponse updatePayment(@PathVariable String version, @PathVariable String groupId,
+                                     @PathVariable String friendId, @PathVariable String paymentId,
+                                     @RequestBody PaymentRequest request) {
         logger.trace("Starting with version {}, groupId {}, friendId {} and paymentId {}", version, groupId, friendId, paymentId);
 
         if (request.getAmount() != null && isNotBlank(request.getDescription()) && request.getDate() != null) {
@@ -163,7 +165,7 @@ public class PaymentController extends BaseController {
                             paymentRepository.save((FriendPayment) payment);
 
                             logger.info("Payment correctly updated {}", paymentId);
-                            return new PaymentResponse(payment);
+                            return new ApiResponse(new PaymentResponse(payment));
                         } else {
                             logger.error("Payment {} was not found in DB", paymentId);
                             throw new EmptyResultDataAccessException(1);

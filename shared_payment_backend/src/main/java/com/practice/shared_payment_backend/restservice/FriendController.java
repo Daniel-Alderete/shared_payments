@@ -6,7 +6,9 @@ import com.practice.shared_payment_backend.models.interfaces.Friend;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
 import com.practice.shared_payment_backend.restservice.common.BaseController;
 import com.practice.shared_payment_backend.restservice.models.requests.FriendRequest;
-import com.practice.shared_payment_backend.restservice.models.responses.FriendResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.ApiResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.friend.FriendListResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.friend.FriendResponse;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -20,7 +22,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class FriendController extends BaseController {
 
     @GetMapping("/api/{version}/groups/{groupId}/friends")
-    public List<FriendResponse> getAllFriends(@PathVariable String version, @PathVariable String groupId) {
+    public ApiResponse getAllFriends(@PathVariable String version, @PathVariable String groupId) {
         logger.trace("Starting with version {} and groupId {}", version, groupId);
         Optional<FriendGroup> group = groupRepository.findById(groupId);
 
@@ -34,7 +36,7 @@ public class FriendController extends BaseController {
                 response.add(new FriendResponse(friend, new HashSet<>(payments)));
             });
 
-            return response;
+            return new ApiResponse(new FriendListResponse(response));
         } else {
             logger.error("Group {} was not found in DB", groupId);
             throw new EmptyResultDataAccessException(1);
@@ -43,8 +45,8 @@ public class FriendController extends BaseController {
 
     @ResponseStatus(value = HttpStatus.CREATED, reason = "Created")
     @PostMapping("/api/{version}/groups/{groupId}/friends")
-    public FriendResponse createFriend(@PathVariable String version, @PathVariable String groupId,
-                                       @RequestBody FriendRequest request) {
+    public ApiResponse createFriend(@PathVariable String version, @PathVariable String groupId,
+                                    @RequestBody FriendRequest request) {
 
         logger.trace("Starting with version {} and groupId {}", version, groupId);
 
@@ -79,7 +81,7 @@ public class FriendController extends BaseController {
                 });
 
                 logger.info("Friend correctly created");
-                return new FriendResponse(friend, payments);
+                return new ApiResponse(new FriendResponse(friend, payments));
             } else {
                 logger.error("Group {} was not found in DB", groupId);
                 throw new EmptyResultDataAccessException(1);
@@ -91,7 +93,7 @@ public class FriendController extends BaseController {
     }
 
     @GetMapping("/api/{version}/groups/{groupId}/friends/{friendId}")
-    public FriendResponse getFriend(@PathVariable String version, @PathVariable String groupId, @PathVariable String friendId) {
+    public ApiResponse getFriend(@PathVariable String version, @PathVariable String groupId, @PathVariable String friendId) {
         logger.trace("Starting with version {}, groupId {} and friendId {}", version, groupId, friendId);
         Optional<FriendGroup> group = groupRepository.findById(groupId);
 
@@ -105,7 +107,7 @@ public class FriendController extends BaseController {
                     logger.debug("Friend {} was found with payments {}", friend.get(), payments);
 
                     logger.info("Retrieving friend {}", friendId);
-                    return new FriendResponse(friend.get(), new HashSet<>(payments));
+                    return new ApiResponse(new FriendResponse(friend.get(), new HashSet<>(payments)));
                 } else {
                     logger.error("Friend {} was not found in DB", friendId);
                     throw new EmptyResultDataAccessException(1);
@@ -121,8 +123,8 @@ public class FriendController extends BaseController {
     }
 
     @PutMapping("/api/{version}/groups/{groupId}/friends/{friendId}")
-    public FriendResponse updateFriend(@PathVariable String version, @PathVariable String groupId,
-                                       @PathVariable String friendId, @RequestBody FriendRequest request) {
+    public ApiResponse updateFriend(@PathVariable String version, @PathVariable String groupId,
+                                    @PathVariable String friendId, @RequestBody FriendRequest request) {
         logger.trace("Starting with version {}, groupId {} and friendId {}", version, groupId, friendId);
 
         if (isNotBlank(request.getName()) && isNotBlank(request.getSurname()) && request.getPayments() != null) {
@@ -164,7 +166,7 @@ public class FriendController extends BaseController {
                         });
 
                         logger.info("Friend {} correctly updated", friendId);
-                        return new FriendResponse(friend, newPayments);
+                        return new ApiResponse(new FriendResponse(friend, newPayments));
                     } else {
                         logger.error("Friend {} was not found in DB", friendId);
                         throw new EmptyResultDataAccessException(1);

@@ -1,8 +1,9 @@
-package com.practice.shared_payment_backend.restservice.models.responses;
+package com.practice.shared_payment_backend.restservice.models.responses.friend;
 
 import com.practice.shared_payment_backend.models.interfaces.Friend;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
 import com.practice.shared_payment_backend.restservice.models.common.AbstractResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.payment.PaymentResponse;
 
 import java.util.HashSet;
 import java.util.Set;

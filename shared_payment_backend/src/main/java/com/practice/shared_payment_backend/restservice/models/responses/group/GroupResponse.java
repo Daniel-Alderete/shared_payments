@@ -1,9 +1,10 @@
-package com.practice.shared_payment_backend.restservice.models.responses;
+package com.practice.shared_payment_backend.restservice.models.responses.group;
 
 import com.practice.shared_payment_backend.models.interfaces.Friend;
 import com.practice.shared_payment_backend.models.interfaces.Group;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
 import com.practice.shared_payment_backend.restservice.models.common.AbstractResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.friend.FriendResponse;
 
 import java.util.HashSet;
 import java.util.Map;

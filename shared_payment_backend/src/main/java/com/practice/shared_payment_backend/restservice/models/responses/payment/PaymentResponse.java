@@ -1,4 +1,4 @@
-package com.practice.shared_payment_backend.restservice.models.responses;
+package com.practice.shared_payment_backend.restservice.models.responses.payment;
 
 import com.practice.shared_payment_backend.models.interfaces.Payment;
 import com.practice.shared_payment_backend.restservice.models.common.AbstractResponse;

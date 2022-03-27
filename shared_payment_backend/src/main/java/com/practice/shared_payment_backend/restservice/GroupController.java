@@ -6,7 +6,9 @@ import com.practice.shared_payment_backend.models.interfaces.Group;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
 import com.practice.shared_payment_backend.restservice.common.BaseController;
 import com.practice.shared_payment_backend.restservice.models.requests.GroupRequest;
-import com.practice.shared_payment_backend.restservice.models.responses.GroupResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.ApiResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.group.GroupListResponse;
+import com.practice.shared_payment_backend.restservice.models.responses.group.GroupResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.group.info.AmountResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.group.info.GroupInfoResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.group.info.MinimumPaymentResponse;
@@ -24,19 +26,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class GroupController extends BaseController {
 
     @GetMapping("/api/{version}/groups")
-    public List<GroupResponse> getAllGroups(@PathVariable String version) {
+    public ApiResponse getAllGroups(@PathVariable String version) {
         logger.trace("Starting with version {}", version);
         List<GroupResponse> response = new ArrayList<>();
 
         groupRepository.findAll().forEach(group -> response.add(new GroupResponse(group,
                 getFriendPaymentMap(group, friendRepository, paymentRepository))));
 
-        return response;
+        return new ApiResponse(new GroupListResponse(response));
     }
 
     @ResponseStatus(value = HttpStatus.CREATED, reason = "Created")
     @PostMapping("/api/{version}/groups")
-    public GroupResponse createGroup(@PathVariable String version, @RequestBody GroupRequest request) {
+    public ApiResponse createGroup(@PathVariable String version, @RequestBody GroupRequest request) {
         logger.trace("Starting with version {}", version);
 
         if (isNotBlank(request.getName()) && isNotBlank(request.getDescription()) && request.getFriends() != null) {
@@ -67,7 +69,7 @@ public class GroupController extends BaseController {
             });
 
             logger.info("Group correctly created");
-            return new GroupResponse(group, friends);
+            return new ApiResponse(new GroupResponse(group, friends));
         } else {
             logger.error("Missing at least one parameter in the request");
             throw new DataRetrievalFailureException("Missing parameter");
@@ -75,13 +77,14 @@ public class GroupController extends BaseController {
     }
 
     @GetMapping("/api/{version}/groups/{groupId}")
-    public GroupResponse getGroup(@PathVariable String version, @PathVariable String groupId) {
+    public ApiResponse getGroup(@PathVariable String version, @PathVariable String groupId) {
         logger.trace("Starting with version {} and groupId {}", version, groupId);
         Optional<FriendGroup> group = groupRepository.findById(groupId);
 
         if (group.isPresent()) {
             logger.info("Retrieving group {}", groupId);
-            return new GroupResponse(group.get(), getFriendPaymentMap(group.get(), friendRepository, paymentRepository));
+            return new ApiResponse(new GroupResponse(group.get(), getFriendPaymentMap(group.get(), friendRepository,
+                    paymentRepository)));
         } else {
             logger.error("Group {} was not found in DB", groupId);
             throw new EmptyResultDataAccessException(1);
@@ -89,8 +92,8 @@ public class GroupController extends BaseController {
     }
 
     @PutMapping("/api/{version}/groups/{groupId}")
-    public GroupResponse updateGroup(@PathVariable String version, @PathVariable String groupId,
-                                     @RequestBody GroupRequest request) {
+    public ApiResponse updateGroup(@PathVariable String version, @PathVariable String groupId,
+                                   @RequestBody GroupRequest request) {
         logger.trace("Starting with version {} and groupId {}", version, groupId);
 
         if (isNotBlank(request.getName()) && isNotBlank(request.getDescription()) && request.getFriends() != null) {
@@ -130,7 +133,7 @@ public class GroupController extends BaseController {
                 });
 
                 logger.info("Group {} correctly updated", groupId);
-                return new GroupResponse(group, newFriendPaymentMap);
+                return new ApiResponse(new GroupResponse(group, newFriendPaymentMap));
             } else {
                 logger.error("Group {} was not found in DB", groupId);
                 throw new EmptyResultDataAccessException(1);
@@ -167,7 +170,7 @@ public class GroupController extends BaseController {
     }
 
     @GetMapping("/api/{version}/groups/{groupId}/info")
-    public GroupInfoResponse getGroupInfo(@PathVariable String version, @PathVariable String groupId) {
+    public ApiResponse getGroupInfo(@PathVariable String version, @PathVariable String groupId) {
         logger.trace("Starting with version {} and groupId {}", version, groupId);
         Optional<FriendGroup> group = groupRepository.findById(groupId);
 
@@ -216,7 +219,7 @@ public class GroupController extends BaseController {
                 logger.info("Group {} has no friends", groupId);
             }
 
-            return new GroupInfoResponse(debts, minimumPayment);
+            return new ApiResponse(new GroupInfoResponse(debts, minimumPayment));
         } else {
             logger.error("Group {} was not found in DB", groupId);
             throw new EmptyResultDataAccessException(1);
