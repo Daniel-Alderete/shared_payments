@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class FriendControllerTest {
+public class FriendControllerContextTest {
 
     @Autowired
     private FriendController controller;
@@ -16,5 +16,4 @@ class FriendControllerTest {
     public void contextLoadsTest() {
         assertNotNull(controller);
     }
-
 }

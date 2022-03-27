@@ -1,2 +1,4 @@
-package com.practice.shared_payment_backend.restservice;public class GroupControllerTest {
+package com.practice.shared_payment_backend.restservice;
+
+public class GroupControllerTest {
 }
