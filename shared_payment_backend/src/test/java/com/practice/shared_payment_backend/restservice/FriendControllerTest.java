@@ -15,9 +15,7 @@ import com.practice.shared_payment_backend.restservice.models.requests.FriendReq
 import com.practice.shared_payment_backend.restservice.models.responses.ApiResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.friend.FriendListResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.friend.FriendResponse;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -38,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
+@TestMethodOrder(MethodOrderer.MethodName.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class FriendControllerTest {
@@ -407,6 +406,7 @@ public class FriendControllerTest {
 
         assertTrue(groupRepository.findById(groupId).isPresent());
         assertTrue(groupRepository.findById(groupId).get().getFriends().isEmpty());
+        assertEquals(0, friendRepository.count());
     }
 
     @Test
@@ -424,6 +424,7 @@ public class FriendControllerTest {
 
         assertTrue(groupRepository.findById(groupId).isPresent());
         assertTrue(groupRepository.findById(groupId).get().getFriends().isEmpty());
+        assertEquals(0, friendRepository.count());
         assertEquals(0, paymentRepository.count());
     }
 
