@@ -11,8 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
-import java.util.Objects;
-
 import static java.util.Objects.requireNonNull;
 import static org.springframework.security.crypto.factory.PasswordEncoderFactories.createDelegatingPasswordEncoder;
 
@@ -36,6 +34,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        /* TODO: CSRF DISABLED DUE TO LIMITATIONS OF TESTING. THIS SHOULD NOT BE DONE IN PRODUCTION */
+        http.csrf().disable();
+
         http.authorizeRequests()
                 .antMatchers("/securityNone")
                 .permitAll()

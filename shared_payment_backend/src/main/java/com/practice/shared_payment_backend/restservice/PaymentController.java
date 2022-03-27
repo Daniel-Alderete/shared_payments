@@ -55,7 +55,7 @@ public class PaymentController extends BaseController {
         }
     }
 
-    @ResponseStatus(value = HttpStatus.CREATED, reason = "Created")
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/api/{version}/groups/{groupId}/friends/{friendId}/payments")
     public ApiResponse createPayment(@PathVariable String version, @PathVariable String groupId,
                                      @PathVariable String friendId, @RequestBody PaymentRequest request) {
@@ -188,7 +188,7 @@ public class PaymentController extends BaseController {
         }
     }
 
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "No Content")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping("/api/{version}/groups/{groupId}/friends/{friendId}/payments/{paymentId}")
     public void deletePayment(@PathVariable String version, @PathVariable String groupId, @PathVariable String friendId,
                               @PathVariable String paymentId) {

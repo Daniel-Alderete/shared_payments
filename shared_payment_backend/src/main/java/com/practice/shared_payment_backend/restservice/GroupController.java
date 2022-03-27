@@ -36,7 +36,7 @@ public class GroupController extends BaseController {
         return new ApiResponse(new GroupListResponse(response));
     }
 
-    @ResponseStatus(value = HttpStatus.CREATED, reason = "Created")
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/api/{version}/groups")
     public ApiResponse createGroup(@PathVariable String version, @RequestBody GroupRequest request) {
         logger.trace("Starting with version {}", version);
@@ -48,7 +48,11 @@ public class GroupController extends BaseController {
             if (!request.getFriends().isEmpty()) {
                 friendRepository.findAllById(request.getFriends()).forEach(friend -> {
                     friends.add(friend);
-                    groupsToUpdate.add(groupRepository.findByFriends(Collections.singleton(friend.getId())));
+                    Group group = groupRepository.findByFriends(Collections.singleton(friend.getId()));
+
+                    if (group != null) {
+                        groupsToUpdate.add(group);
+                    }
                 });
 
                 if (friends.isEmpty() || request.getFriends().size() != friends.size()) {
@@ -109,7 +113,12 @@ public class GroupController extends BaseController {
                         Set<Payment> payments = new HashSet<>();
                         paymentRepository.findAllById(friend.getPayments()).forEach(payments::add);
                         newFriendPaymentMap.put(friend, payments);
-                        groupsToUpdate.add(groupRepository.findByFriends(Collections.singleton(friend.getId())));
+
+                        Group groupToUpdate = groupRepository.findByFriends(Collections.singleton(friend.getId()));
+
+                        if (groupToUpdate != null && !groupId.equals(groupToUpdate.getId())) {
+                            groupsToUpdate.add(groupToUpdate);
+                        }
                     });
 
                     if (newFriendPaymentMap.isEmpty() || request.getFriends().size() != newFriendPaymentMap.size()) {
@@ -144,7 +153,7 @@ public class GroupController extends BaseController {
         }
     }
 
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "No Content")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping("/api/{version}/groups/{groupId}")
     public void deleteGroup(@PathVariable String version, @PathVariable String groupId) {
         logger.trace("Starting with version {} and groupId {}", version, groupId);
@@ -154,7 +163,7 @@ public class GroupController extends BaseController {
             Group group = optionalGroup.get();
 
             friendRepository.findAllById(group.getFriends()).forEach(friend -> {
-                logger.debug("Deleting friend {} with payments {}", friend, friend.getPayments());
+                logger.debug("Deleting friend {}", friend);
                 paymentRepository.deleteAllById(friend.getPayments());
                 friendRepository.delete(friend);
             });

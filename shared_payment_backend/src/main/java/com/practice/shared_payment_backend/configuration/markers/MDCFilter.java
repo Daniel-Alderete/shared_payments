@@ -53,7 +53,7 @@ public class MDCFilter extends OncePerRequestFilter {
             token = UUID.randomUUID().toString().toUpperCase().replace("-", "");
         }
 
-        logger.trace("Marker id {}", token);
+        logger.trace("Marker id is: {}", token);
 
         return token;
     }

@@ -43,7 +43,7 @@ public class FriendController extends BaseController {
         }
     }
 
-    @ResponseStatus(value = HttpStatus.CREATED, reason = "Created")
+    @ResponseStatus(value = HttpStatus.CREATED)
     @PostMapping("/api/{version}/groups/{groupId}/friends")
     public ApiResponse createFriend(@PathVariable String version, @PathVariable String groupId,
                                     @RequestBody FriendRequest request) {
@@ -60,7 +60,11 @@ public class FriendController extends BaseController {
                 if (!request.getPayments().isEmpty()) {
                     paymentRepository.findAllById(request.getPayments()).forEach(payment -> {
                         payments.add(payment);
-                        friendsToUpdate.add(friendRepository.findByPayments(Collections.singleton(payment.getId())));
+                        Friend friendToUpdate = friendRepository.findByPayments(Collections.singleton(payment.getId()));
+
+                        if (friendToUpdate != null) {
+                            friendsToUpdate.add(friendToUpdate);
+                        }
                     });
 
                     if (payments.isEmpty() || request.getPayments().size() != payments.size()) {
@@ -142,7 +146,11 @@ public class FriendController extends BaseController {
                         if (!request.getPayments().isEmpty()) {
                             paymentRepository.findAllById(request.getPayments()).forEach(payment -> {
                                 newPayments.add(payment);
-                                friendsToUpdate.add(friendRepository.findByPayments(Collections.singleton(payment.getId())));
+                                Friend friendToUpdate = friendRepository.findByPayments(Collections.singleton(payment.getId()));
+
+                                if (friendToUpdate != null && !friendId.equals(friendToUpdate.getId())) {
+                                    friendsToUpdate.add(friendToUpdate);
+                                }
                             });
 
                             if (newPayments.isEmpty() || request.getPayments().size() != newPayments.size()) {
@@ -185,7 +193,7 @@ public class FriendController extends BaseController {
         }
     }
 
-    @ResponseStatus(value = HttpStatus.NO_CONTENT, reason = "No Content")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
     @DeleteMapping("/api/{version}/groups/{groupId}/friends/{friendId}")
     public void deleteFriend(@PathVariable String version, @PathVariable String groupId, @PathVariable String friendId) {
         logger.trace("Starting with version {}, groupId {} and friendId {}", version, groupId, friendId);
@@ -196,7 +204,7 @@ public class FriendController extends BaseController {
                 Optional<FriendMember> friend = friendRepository.findById(friendId);
 
                 if (friend.isPresent()) {
-                    logger.debug("Deleting friend {} with payments {}", friend.get(), friend.get().getPayments());
+                    logger.debug("Deleting friend {}", friend.get());
                     paymentRepository.deleteAllById(friend.get().getPayments());
                     friendRepository.delete(friend.get());
 
