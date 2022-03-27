@@ -208,19 +208,7 @@ public class GroupController extends BaseController {
                         debts.add(new AmountResponse(entry.getKey().getId(), debt));
                     }
 
-                    debtMap.firstEntry(); //el que más debe
-                    debtMap.lastEntry(); //al que más le deben
-
-                    float remainingDebt = debtMap.lastEntry().getKey() + debtMap.firstEntry().getKey();
-
-                    if (remainingDebt > 0) {
-                        //ya se ha terminado de pagar el fulano que sea
-                        debtMap.subMap(debtMap.firstEntry().getKey(), false,
-                                debtMap.lastEntry().getKey(), false).remove();
-
-                    } else {
-                        //todavía le queda de pogar
-                    }
+                    minimumPayment = getMinimumPaymentResponse(calculateMinimumPayments(debtMap, new HashMap<>()));
                 } else {
                     logger.info("Group {} has no expenses", groupId);
                 }
@@ -233,5 +221,59 @@ public class GroupController extends BaseController {
             logger.error("Group {} was not found in DB", groupId);
             throw new EmptyResultDataAccessException(1);
         }
+    }
+
+    private Map<String, List<AmountResponse>> calculateMinimumPayments(NavigableMap<Float, Friend> debtMap,
+                                                                       Map<String, List<AmountResponse>> minimumPayments) {
+
+        Friend lowestDebtor = debtMap.lastEntry().getValue();
+        Friend highestDebtor = debtMap.firstEntry().getValue();
+        Float highestDebtorDebt = debtMap.firstEntry().getKey();
+        Float lowestDebtorDebt = debtMap.lastEntry().getKey();
+        NavigableMap<Float, Friend> newDebtMap = debtMap.subMap(highestDebtorDebt, false, lowestDebtorDebt, false);
+
+        logger.debug("Calculating minimum payment between {} with a debt of {} and {} with a payment of {}",
+                highestDebtor, highestDebtorDebt, lowestDebtor, lowestDebtorDebt);
+
+        float remainingDebt = highestDebtorDebt + lowestDebtorDebt;
+        float amount = 0;
+        logger.debug("Remaining debt {}", remainingDebt);
+
+
+        if (remainingDebt == 0) {
+            logger.debug("Debt cancelled between lowest and highest debtor");
+            amount = highestDebtorDebt;
+        } else if (remainingDebt > 0) {
+            logger.debug("Lowest debtor still has an amount to be payed");
+            newDebtMap.put(remainingDebt, lowestDebtor);
+            amount = lowestDebtorDebt;
+        } else if (remainingDebt < 0) {
+            logger.debug("Highest debtor still owes money");
+            newDebtMap.put(remainingDebt, highestDebtor);
+            amount = highestDebtorDebt;
+        }
+
+        List<AmountResponse> payments = minimumPayments.get(highestDebtor.getId());
+
+        if (payments == null) {
+            payments = new ArrayList<>();
+        }
+
+        payments.add(new AmountResponse(lowestDebtor.getId(), amount));
+        minimumPayments.put(highestDebtor.getId(), payments);
+
+        if (newDebtMap.size() > 0) {
+            return calculateMinimumPayments(newDebtMap, minimumPayments);
+        } else {
+            logger.debug("Minimum payment calculation finished");
+            return minimumPayments;
+        }
+    }
+
+    private List<MinimumPaymentResponse> getMinimumPaymentResponse(Map<String, List<AmountResponse>> minimumPayments) {
+        List<MinimumPaymentResponse> minimumPaymentResponses = new ArrayList<>();
+        minimumPayments.forEach((key, value) -> minimumPaymentResponses.add(new MinimumPaymentResponse(key, value)));
+
+        return minimumPaymentResponses;
     }
 }
