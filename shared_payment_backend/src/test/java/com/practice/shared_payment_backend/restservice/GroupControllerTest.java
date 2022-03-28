@@ -404,7 +404,7 @@ public class GroupControllerTest {
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
-    public void deleteGroup_GroupWithoutFriends_Ok() throws Exception {
+    public void deleteGroup_GroupWithoutFriends_NoContent() throws Exception {
         Group group = groupRepository.save(new FriendGroup("Test Group 1", "Test description", new HashSet<>()));
 
         this.mockMvc.perform(delete(getGroupEndpointUrl(group.getId())))
@@ -415,7 +415,7 @@ public class GroupControllerTest {
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
-    public void deleteGroup_GroupWithFriendsWithoutPayments_Ok() throws Exception {
+    public void deleteGroup_GroupWithFriendsWithoutPayments_NoContent() throws Exception {
         Friend friend1 = friendRepository.save(new FriendMember("Test Friend 1", "Test Description", new HashSet<>()));
         Friend friend2 = friendRepository.save(new FriendMember("Test Friend 2", "Test Description", new HashSet<>()));
         Group group = groupRepository.save(new FriendGroup("Test Group 2", "Test description",
@@ -430,7 +430,7 @@ public class GroupControllerTest {
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
-    public void deleteGroup_GroupWithFriendsWithPayments_Ok() throws Exception {
+    public void deleteGroup_GroupWithFriendsWithPayments_NoContent() throws Exception {
         Payment payment1 = paymentRepository.save(new FriendPayment(54.5f, "Test description",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
         Payment payment2 = paymentRepository.save(new FriendPayment(196.7f, "Test description",

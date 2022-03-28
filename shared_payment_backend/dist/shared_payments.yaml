@@ -567,6 +567,7 @@ components:
           type: string
         date:
           type: integer
+          description: an unix seconds epoch representation of a date, in UTC time
     PaymentUpdate:
       type: object
       properties:
@@ -576,6 +577,7 @@ components:
           type: string
         date:
           type: integer
+          description: an unix seconds epoch representation of a date, in UTC time
     Friend:
       type: object
       properties:

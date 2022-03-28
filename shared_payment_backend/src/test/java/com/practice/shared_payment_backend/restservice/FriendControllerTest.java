@@ -385,7 +385,7 @@ public class FriendControllerTest {
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
-    public void deleteFriend_FriendWithoutPayments_Ok() throws Exception {
+    public void deleteFriend_FriendWithoutPayments_NoContent() throws Exception {
         Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "test surname", new HashSet<>()));
         group.setFriends(Collections.singleton(friend.getId()));
         groupRepository.save((FriendGroup) group);
@@ -400,7 +400,7 @@ public class FriendControllerTest {
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
-    public void deleteFriend_FriendWithPayments_Ok() throws Exception {
+    public void deleteFriend_FriendWithPayments_NoContent() throws Exception {
         Payment payment = paymentRepository.save(new FriendPayment(54.5f, "Test description",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
         Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test surname",
