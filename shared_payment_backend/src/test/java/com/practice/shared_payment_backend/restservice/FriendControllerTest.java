@@ -1,7 +1,6 @@
 package com.practice.shared_payment_backend.restservice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.practice.shared_payment_backend.models.friends.FriendGroup;
 import com.practice.shared_payment_backend.models.friends.FriendMember;
 import com.practice.shared_payment_backend.models.friends.FriendPayment;
@@ -93,12 +92,12 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getAllFriends_FriendsFoundNoPayments_Ok() throws Exception {
-        Friend friend1 = friendRepository.save(new FriendMember("Test Friend 1", "Test Description", new HashSet<>()));
-        Friend friend2 = friendRepository.save(new FriendMember("Test Friend 2", "Test Description", new HashSet<>()));
+        Friend friend1 = friendRepository.save(new FriendMember("Test Friend 1", "test surname", new HashSet<>()));
+        Friend friend2 = friendRepository.save(new FriendMember("Test Friend 2", "test surname", new HashSet<>()));
         group.setFriends(new HashSet<>(Arrays.asList(friend1.getId(), friend2.getId())));
         groupRepository.save((FriendGroup) group);
-        String result = new ObjectMapper().writeValueAsString(new ApiResponse(new FriendListResponse(
-                Arrays.asList(new FriendResponse(friend1), new FriendResponse(friend2)))));
+        String result = new ApiResponse(new FriendListResponse(Arrays.asList(new FriendResponse(friend1),
+                new FriendResponse(friend2)))).toString();
 
         this.mockMvc.perform(get(getFriendsEndpointUrl(groupId)))
                 .andExpect(status().isOk())
@@ -112,14 +111,13 @@ public class FriendControllerTest {
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
         Payment payment2 = paymentRepository.save(new FriendPayment(196.7f, "Test description",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
-        Friend friend1 = friendRepository.save(new FriendMember("Test Friend 1", "Test Description",
+        Friend friend1 = friendRepository.save(new FriendMember("Test Friend 1", "test surname",
                 new HashSet<>(Arrays.asList(payment1.getId(), payment2.getId()))));
-        Friend friend2 = friendRepository.save(new FriendMember("Test Friend 2", "Test Description", new HashSet<>()));
+        Friend friend2 = friendRepository.save(new FriendMember("Test Friend 2", "test surname", new HashSet<>()));
         group.setFriends(new HashSet<>(Arrays.asList(friend1.getId(), friend2.getId())));
         groupRepository.save((FriendGroup) group);
-        String result = new ObjectMapper().writeValueAsString(new ApiResponse(new FriendListResponse(
-                Arrays.asList(new FriendResponse(friend1, new HashSet<>(Arrays.asList(payment1, payment2))),
-                        new FriendResponse(friend2)))));
+        String result = new ApiResponse(new FriendListResponse(Arrays.asList(new FriendResponse(friend1,
+                new HashSet<>(Arrays.asList(payment1, payment2))), new FriendResponse(friend2)))).toString();
 
         this.mockMvc.perform(get(getFriendsEndpointUrl(groupId)))
                 .andExpect(status().isOk())
@@ -138,7 +136,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_NullParameters_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest());
+        String body = new FriendRequest().toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -149,7 +147,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_NullName_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest(null, "Test surname", new HashSet<>()));
+        String body = new FriendRequest(null, "Test surname", new HashSet<>()).toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -160,7 +158,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_NullSurname_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", null, new HashSet<>()));
+        String body = new FriendRequest("Test name", null, new HashSet<>()).toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -171,7 +169,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_NullPayments_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test description", null));
+        String body = new FriendRequest("Test name", "test surname", null).toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -182,9 +180,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_MissingName_BadRequest() throws Exception {
-        String body = ((ObjectNode) new ObjectMapper()
-                .valueToTree(new FriendRequest(null, "Test surname", new HashSet<>())))
-                .remove("name").toString();
+        String body = new FriendRequest(null, "Test surname", new HashSet<>()).toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -195,9 +191,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_MissingSurname_BadRequest() throws Exception {
-        String body = ((ObjectNode) new ObjectMapper()
-                .valueToTree(new FriendRequest("Test name", null, new HashSet<>())))
-                .remove("surname").toString();
+        String body = new FriendRequest("Test name", null, new HashSet<>()).toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -208,9 +202,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_MissingPayments_BadRequest() throws Exception {
-        String body = ((ObjectNode) new ObjectMapper()
-                .valueToTree(new FriendRequest("Test name", "Test description", null)))
-                .remove("payments").toString();
+        String body = new FriendRequest("Test name", "test surname", null).toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -221,7 +213,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_MissingGroup_NotFound() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname", new HashSet<>()));
+        String body = new FriendRequest("Test name", "Test surname", new HashSet<>()).toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(RANDOM_NUMBER))
                         .content(body)
@@ -232,7 +224,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_NoPayments_Created() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname", new HashSet<>()));
+        String body = new FriendRequest("Test name", "Test surname", new HashSet<>()).toString();
 
         ResultActions result = this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -245,14 +237,14 @@ public class FriendControllerTest {
         assertEquals("Test surname", friend.getSurname());
         assertTrue(friend.getPayments().isEmpty());
 
-        result.andExpect(content().json(new ObjectMapper().writeValueAsString(new ApiResponse(new FriendResponse(friend)))));
+        result.andExpect(content().json(new ApiResponse(new FriendResponse(friend)).toString()));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createFriend_PaymentNotFound_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname",
-                new HashSet<>(Collections.singletonList(RANDOM_NUMBER))));
+        String body = new FriendRequest("Test name", "Test surname",
+                Collections.singleton(RANDOM_NUMBER)).toString();
 
         this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -265,8 +257,8 @@ public class FriendControllerTest {
     public void createFriend_WithPayment_Created() throws Exception {
         Payment payment = paymentRepository.save(new FriendPayment(54.5f, "Test description",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname",
-                new HashSet<>(Collections.singletonList(payment.getId()))));
+        String body = new FriendRequest("Test name", "Test surname",
+                Collections.singleton(payment.getId())).toString();
 
         ResultActions result = this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -280,8 +272,7 @@ public class FriendControllerTest {
         assertFalse(friend.getPayments().isEmpty());
         assertTrue(friend.getPayments().contains(payment.getId()));
 
-        result.andExpect(content().json(new ObjectMapper()
-                .writeValueAsString(new ApiResponse(new FriendResponse(friend, Collections.singleton(payment))))));
+        result.andExpect(content().json(new ApiResponse(new FriendResponse(friend, Collections.singleton(payment))).toString()));
     }
 
     @Test
@@ -289,11 +280,11 @@ public class FriendControllerTest {
     public void createFriend_WithPaymentAlreadyExisting_Created() throws Exception {
         Payment payment = paymentRepository.save(new FriendPayment(54.5f, "Test description",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
-        friendRepository.save(new FriendMember("Test Friend 2", "Test Description",
-                new HashSet<>(Collections.singletonList(payment.getId()))));
+        friendRepository.save(new FriendMember("Test Friend 2", "test surname",
+                Collections.singleton(payment.getId())));
 
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname",
-                new HashSet<>(Collections.singletonList(payment.getId()))));
+        String body = new FriendRequest("Test name", "Test surname",
+                Collections.singleton(payment.getId())).toString();
 
         ResultActions result = this.mockMvc.perform(post(getFriendsEndpointUrl(groupId))
                         .content(body)
@@ -306,12 +297,11 @@ public class FriendControllerTest {
         assertNotNull(friend);
         assertFalse(friend.getPayments().isEmpty());
         assertTrue(friend.getPayments().contains(payment.getId()));
-        Friend existingFriend = friendRepository.findByNameAndSurname("Test Friend 2", "Test Description");
+        Friend existingFriend = friendRepository.findByNameAndSurname("Test Friend 2", "test surname");
         assertNotNull(existingFriend);
         assertTrue(existingFriend.getPayments().isEmpty());
 
-        result.andExpect(content().json(new ObjectMapper()
-                .writeValueAsString(new ApiResponse(new FriendResponse(friend, Collections.singleton(payment))))));
+        result.andExpect(content().json(new ApiResponse(new FriendResponse(friend, Collections.singleton(payment))).toString()));
     }
 
     @Test
@@ -341,11 +331,11 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getFriend_FriendWithoutPayments_Ok() throws Exception {
-        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test Description", new HashSet<>()));
+        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "test surname", new HashSet<>()));
         group.setFriends(Collections.singleton(friend.getId()));
         groupRepository.save((FriendGroup) group);
 
-        String result = new ObjectMapper().writeValueAsString(new ApiResponse(new FriendResponse(friend)));
+        String result = new ApiResponse(new FriendResponse(friend)).toString();
 
         this.mockMvc.perform(get(getFriendEndpointUrl(groupId, friend.getId())))
                 .andExpect(status().isOk())
@@ -357,13 +347,12 @@ public class FriendControllerTest {
     public void getFriend_FriendWithPayments_Ok() throws Exception {
         Payment payment = paymentRepository.save(new FriendPayment(54.5f, "Test description",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
-        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test Description",
+        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "test surname",
                 Collections.singleton(payment.getId())));
         group.setFriends(Collections.singleton(friend.getId()));
         groupRepository.save((FriendGroup) group);
 
-        String result = new ObjectMapper().writeValueAsString(new ApiResponse(new FriendResponse(friend,
-                Collections.singleton(payment))));
+        String result = new ApiResponse(new FriendResponse(friend, Collections.singleton(payment))).toString();
 
         this.mockMvc.perform(get(getFriendEndpointUrl(groupId, friend.getId())))
                 .andExpect(status().isOk())
@@ -397,7 +386,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void deleteFriend_FriendWithoutPayments_Ok() throws Exception {
-        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test Description", new HashSet<>()));
+        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "test surname", new HashSet<>()));
         group.setFriends(Collections.singleton(friend.getId()));
         groupRepository.save((FriendGroup) group);
 
@@ -414,7 +403,7 @@ public class FriendControllerTest {
     public void deleteFriend_FriendWithPayments_Ok() throws Exception {
         Payment payment = paymentRepository.save(new FriendPayment(54.5f, "Test description",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
-        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test Description",
+        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test surname",
                 Collections.singleton(payment.getId())));
         group.setFriends(Collections.singleton(friend.getId()));
         groupRepository.save((FriendGroup) group);
@@ -440,7 +429,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_NullParameters_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest());
+        String body = new FriendRequest().toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -451,7 +440,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_NullName_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest(null, "Test surname", new HashSet<>()));
+        String body = new FriendRequest(null, "Test surname", new HashSet<>()).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -462,7 +451,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_NullSurname_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", null, new HashSet<>()));
+        String body = new FriendRequest("Test name", null, new HashSet<>()).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -473,7 +462,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_NullPayments_BadRequest() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test description", null));
+        String body = new FriendRequest("Test name", "Test surname", null).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -484,9 +473,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_MissingName_BadRequest() throws Exception {
-        String body = ((ObjectNode) new ObjectMapper()
-                .valueToTree(new FriendRequest(null, "Test surname", new HashSet<>())))
-                .remove("name").toString();
+        String body = new FriendRequest(null, "Test surname", new HashSet<>()).asJson().toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -497,9 +484,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_MissingSurname_BadRequest() throws Exception {
-        String body = ((ObjectNode) new ObjectMapper()
-                .valueToTree(new FriendRequest("Test name", null, new HashSet<>())))
-                .remove("surname").toString();
+        String body = new FriendRequest("Test name", null, new HashSet<>()).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -510,9 +495,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_MissingPayments_BadRequest() throws Exception {
-        String body = ((ObjectNode) new ObjectMapper()
-                .valueToTree(new FriendRequest("Test name", "Test description", null)))
-                .remove("payments").toString();
+        String body = new FriendRequest("Test name", "test surname", null).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -523,7 +506,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_MissingGroup_NotFound() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname", new HashSet<>()));
+        String body = new FriendRequest("Test name", "Test surname", new HashSet<>()).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(RANDOM_NUMBER, RANDOM_NUMBER))
                         .content(body)
@@ -534,7 +517,7 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_FriendNotInGroup_NotFound() throws Exception {
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname", new HashSet<>()));
+        String body = new FriendRequest("Test name", "Test surname", new HashSet<>()).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -547,7 +530,7 @@ public class FriendControllerTest {
     public void updateFriend_FriendNotFound_NotFound() throws Exception {
         group.setFriends(Collections.singleton(RANDOM_NUMBER));
         groupRepository.save((FriendGroup) group);
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname", new HashSet<>()));
+        String body = new FriendRequest("Test name", "Test surname", new HashSet<>()).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
@@ -558,10 +541,10 @@ public class FriendControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_NoPayments_Ok() throws Exception {
-        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test Description", new HashSet<>()));
+        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "test surname", new HashSet<>()));
         group.setFriends(Collections.singleton(friend.getId()));
         groupRepository.save((FriendGroup) group);
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname", new HashSet<>()));
+        String body = new FriendRequest("Test name", "Test surname", new HashSet<>()).toString();
 
         ResultActions result = this.mockMvc.perform(put(getFriendEndpointUrl(groupId, friend.getId()))
                         .content(body)
@@ -574,17 +557,17 @@ public class FriendControllerTest {
         assertEquals("Test surname", friend.getSurname());
         assertTrue(friend.getPayments().isEmpty());
 
-        result.andExpect(content().json(new ObjectMapper().writeValueAsString(new ApiResponse(new FriendResponse(friend)))));
+        result.andExpect(content().json(new ApiResponse(new FriendResponse(friend)).toString()));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_PaymentNotFound_BadRequest() throws Exception {
-        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test Description", new HashSet<>()));
+        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "test surname", new HashSet<>()));
         group.setFriends(Collections.singleton(friend.getId()));
         groupRepository.save((FriendGroup) group);
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname",
-                new HashSet<>(Collections.singletonList(RANDOM_NUMBER))));
+        String body = new FriendRequest("Test name", "Test surname",
+                Collections.singleton(RANDOM_NUMBER)).toString();
 
         this.mockMvc.perform(put(getFriendEndpointUrl(groupId, friend.getId()))
                         .content(body)
@@ -597,13 +580,12 @@ public class FriendControllerTest {
     public void updateFriend_WithPayment_Ok() throws Exception {
         Payment payment = paymentRepository.save(new FriendPayment(54.5f, "Test description",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
-        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "Test Description",
+        Friend friend = friendRepository.save(new FriendMember("Test Friend 2", "test surname",
                 Collections.singleton(payment.getId())));
         group.setFriends(Collections.singleton(friend.getId()));
         groupRepository.save((FriendGroup) group);
 
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname",
-                new HashSet<>()));
+        String body = new FriendRequest("Test name", "Test surname", new HashSet<>()).toString();
 
         ResultActions result = this.mockMvc.perform(put(getFriendEndpointUrl(groupId, friend.getId()))
                         .content(body)
@@ -617,23 +599,22 @@ public class FriendControllerTest {
         assertTrue(friend.getPayments().isEmpty());
         assertEquals(1, paymentRepository.count());
 
-        result.andExpect(content().json(new ObjectMapper()
-                .writeValueAsString(new ApiResponse(new FriendResponse(friend, new HashSet<>())))));
+        result.andExpect(content().json(new ApiResponse(new FriendResponse(friend, new HashSet<>())).toString()));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateFriend_WithEmptyPayment_Ok() throws Exception {
-        Friend friend = friendRepository.save(new FriendMember("Test Friend 1", "Test Description", new HashSet<>()));
-        Payment payment = paymentRepository.save(new FriendPayment(54.5f, "Test description",
+        Friend friend = friendRepository.save(new FriendMember("Test Friend 1", "test surname", new HashSet<>()));
+        Payment payment = paymentRepository.save(new FriendPayment(54.5f, "test surname",
                 Instant.now(Clock.systemUTC()).getEpochSecond()));
-        Friend friend2 = friendRepository.save(new FriendMember("Test Friend 2", "Test Description",
+        Friend friend2 = friendRepository.save(new FriendMember("Test Friend 2", "test surname",
                 Collections.singleton(payment.getId())));
         group.setFriends(new HashSet<>(Arrays.asList(friend.getId(), friend2.getId())));
         groupRepository.save((FriendGroup) group);
 
-        String body = new ObjectMapper().writeValueAsString(new FriendRequest("Test name", "Test surname",
-                new HashSet<>(Collections.singletonList(payment.getId()))));
+        String body = new FriendRequest("Test name", "Test surname",
+                Collections.singleton(payment.getId())).toString();
 
         ResultActions result = this.mockMvc.perform(put(getFriendEndpointUrl(groupId, friend.getId()))
                         .content(body)
@@ -641,7 +622,7 @@ public class FriendControllerTest {
                 .andExpect(status().isOk());
 
         assertEquals(2, friendRepository.count());
-        friend2 = friendRepository.findByNameAndSurname("Test Friend 2", "Test Description");
+        friend2 = friendRepository.findByNameAndSurname("Test Friend 2", "test surname");
         assertNotNull(friend2);
         assertTrue(friend2.getPayments().isEmpty());
         friend = friendRepository.findByNameAndSurname("Test name", "Test surname");
@@ -649,7 +630,6 @@ public class FriendControllerTest {
         assertFalse(friend.getPayments().isEmpty());
         assertTrue(friend.getPayments().contains(payment.getId()));
 
-        result.andExpect(content().json(new ObjectMapper()
-                .writeValueAsString(new ApiResponse(new FriendResponse(friend, Collections.singleton(payment))))));
+        result.andExpect(content().json(new ApiResponse(new FriendResponse(friend, Collections.singleton(payment))).toString()));
     }
 }

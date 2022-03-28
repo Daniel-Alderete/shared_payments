@@ -17,6 +17,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 import static com.practice.shared_payment_backend.repository.utils.FriendUtils.getFriendPaymentMap;
@@ -42,12 +44,14 @@ public class GroupController extends BaseController {
         logger.trace("Starting with version {}", version);
 
         if (isNotBlank(request.getName()) && isNotBlank(request.getDescription()) && request.getFriends() != null) {
-            Set<Friend> friends = new HashSet<>();
             Set<Group> groupsToUpdate = new HashSet<>();
+            Map<Friend, Set<Payment>> newFriendPaymentMap = new HashMap<>();
 
             if (!request.getFriends().isEmpty()) {
                 friendRepository.findAllById(request.getFriends()).forEach(friend -> {
-                    friends.add(friend);
+                    Set<Payment> payments = new HashSet<>();
+                    paymentRepository.findAllById(friend.getPayments()).forEach(payments::add);
+                    newFriendPaymentMap.put(friend, payments);
                     Group group = groupRepository.findByFriends(Collections.singleton(friend.getId()));
 
                     if (group != null) {
@@ -55,9 +59,9 @@ public class GroupController extends BaseController {
                     }
                 });
 
-                if (friends.isEmpty() || request.getFriends().size() != friends.size()) {
+                if (newFriendPaymentMap.isEmpty() || request.getFriends().size() != newFriendPaymentMap.size()) {
                     logger.error("At least one friend was not found in the DB {}", request.getFriends());
-                    throw new DataRetrievalFailureException("Payments not found");
+                    throw new DataRetrievalFailureException("Friends not found");
                 }
             }
 
@@ -73,7 +77,7 @@ public class GroupController extends BaseController {
             });
 
             logger.info("Group correctly created");
-            return new ApiResponse(new GroupResponse(group, friends));
+            return new ApiResponse(new GroupResponse(group, newFriendPaymentMap));
         } else {
             logger.error("Missing at least one parameter in the request");
             throw new DataRetrievalFailureException("Missing parameter");
@@ -113,7 +117,6 @@ public class GroupController extends BaseController {
                         Set<Payment> payments = new HashSet<>();
                         paymentRepository.findAllById(friend.getPayments()).forEach(payments::add);
                         newFriendPaymentMap.put(friend, payments);
-
                         Group groupToUpdate = groupRepository.findByFriends(Collections.singleton(friend.getId()));
 
                         if (groupToUpdate != null && !groupId.equals(groupToUpdate.getId())) {
@@ -123,7 +126,7 @@ public class GroupController extends BaseController {
 
                     if (newFriendPaymentMap.isEmpty() || request.getFriends().size() != newFriendPaymentMap.size()) {
                         logger.error("At least one friend was not found in the DB {}", request.getFriends());
-                        throw new DataRetrievalFailureException("Payments not found");
+                        throw new DataRetrievalFailureException("Friends not found");
                     }
                 }
 
@@ -187,37 +190,38 @@ public class GroupController extends BaseController {
             logger.debug("Searching for group {} info", groupId);
             List<AmountResponse> debts = new ArrayList<>();
             List<MinimumPaymentResponse> minimumPayment = new ArrayList<>();
-            NavigableMap<Float, Friend> debtMap = new TreeMap<>();
+            Map<Friend, BigDecimal> debtMap = new HashMap<>();
             Map<Friend, Set<Payment>> friendPaymentMap = getFriendPaymentMap(group.get(), friendRepository, paymentRepository);
             int totalFriends = friendPaymentMap.size();
 
-            if (totalFriends > 0) {
-                float totalExpenses = 0;
+            if (totalFriends > 1) {
+                BigDecimal totalExpenses = BigDecimal.valueOf(0);
                 logger.debug("Group {} number of friends is {}", groupId, totalFriends);
 
                 for (Set<Payment> payments : friendPaymentMap.values()) {
                     for (Payment payment : payments) {
-                        totalExpenses += payment.getAmount();
+                        totalExpenses = totalExpenses.add(BigDecimal.valueOf(payment.getAmount()).setScale(2, RoundingMode.HALF_EVEN));
                     }
                 }
 
                 logger.debug("Group {} total expenses are {}", groupId, totalExpenses);
 
-                if (totalExpenses > 0) {
-                    float sharedExpenses = totalExpenses / totalFriends;
+                if (totalExpenses.compareTo(BigDecimal.valueOf(0)) > 0) {
+                    BigDecimal sharedExpenses = totalExpenses.divide(BigDecimal.valueOf(totalFriends), 2, RoundingMode.HALF_EVEN);
 
                     for (Map.Entry<Friend, Set<Payment>> entry : friendPaymentMap.entrySet()) {
-                        float friendExpenses = 0;
+                        BigDecimal friendExpenses = BigDecimal.valueOf(0);
 
                         for (Payment payment : entry.getValue()) {
-                            friendExpenses += payment.getAmount();
+                            friendExpenses = friendExpenses.add(BigDecimal.valueOf(payment.getAmount()).setScale(2, RoundingMode.HALF_EVEN));
                         }
 
-                        float debt = friendExpenses - sharedExpenses;
+                        BigDecimal debt = friendExpenses.subtract(sharedExpenses);
 
                         logger.info("Friend {} has a debt of {}", entry.getKey().getId(), debt);
-                        debtMap.put(debt, entry.getKey());
-                        debts.add(new AmountResponse(entry.getKey().getId(), debt));
+                        debtMap.put(entry.getKey(), debt);
+                        debts.add(new AmountResponse(entry.getKey().getId(), debt.floatValue(), entry.getKey().getName(),
+                                entry.getKey().getSurname()));
                     }
 
                     minimumPayment = getMinimumPaymentResponse(calculateMinimumPayments(debtMap, new HashMap<>()));
@@ -225,7 +229,7 @@ public class GroupController extends BaseController {
                     logger.info("Group {} has no expenses", groupId);
                 }
             } else {
-                logger.info("Group {} has no friends", groupId);
+                logger.info("Group {} has either no friends or only one", groupId);
             }
 
             return new ApiResponse(new GroupInfoResponse(debts, minimumPayment));
@@ -235,57 +239,89 @@ public class GroupController extends BaseController {
         }
     }
 
-    private Map<String, List<AmountResponse>> calculateMinimumPayments(NavigableMap<Float, Friend> debtMap,
-                                                                       Map<String, List<AmountResponse>> minimumPayments) {
-
-        Friend lowestDebtor = debtMap.lastEntry().getValue();
-        Friend highestDebtor = debtMap.firstEntry().getValue();
-        Float highestDebtorDebt = debtMap.firstEntry().getKey();
-        Float lowestDebtorDebt = debtMap.lastEntry().getKey();
-        NavigableMap<Float, Friend> newDebtMap = debtMap.subMap(highestDebtorDebt, false, lowestDebtorDebt, false);
+    private Map<Friend, List<AmountResponse>> calculateMinimumPayments(Map<Friend, BigDecimal> debtMap,
+                                                                       Map<Friend, List<AmountResponse>> minimumPayments) {
+        Map.Entry<Friend, BigDecimal> lowestDebtorEntry = getLowestDebtor(debtMap);
+        Map.Entry<Friend, BigDecimal> highestDebtorEntry = getHighestDebtor(debtMap);
+        Friend lowestDebtor = lowestDebtorEntry.getKey();
+        Friend highestDebtor = highestDebtorEntry.getKey();
+        BigDecimal highestDebtorDebt = highestDebtorEntry.getValue();
+        BigDecimal lowestDebtorDebt = lowestDebtorEntry.getValue();
 
         logger.debug("Calculating minimum payment between {} with a debt of {} and {} with a payment of {}",
                 highestDebtor, highestDebtorDebt, lowestDebtor, lowestDebtorDebt);
 
-        float remainingDebt = highestDebtorDebt + lowestDebtorDebt;
-        float amount = 0;
+        BigDecimal remainingDebt = highestDebtorDebt.add(lowestDebtorDebt);
         logger.debug("Remaining debt {}", remainingDebt);
 
+        BigDecimal amount = BigDecimal.valueOf(0);
+        debtMap.remove(highestDebtor);
+        debtMap.remove(lowestDebtor);
 
-        if (remainingDebt == 0) {
+        if (remainingDebt.compareTo(BigDecimal.valueOf(0)) == 0) {
             logger.debug("Debt cancelled between lowest and highest debtor");
             amount = highestDebtorDebt;
-        } else if (remainingDebt > 0) {
+        } else if (remainingDebt.compareTo(BigDecimal.valueOf(0)) > 0) {
             logger.debug("Lowest debtor still has an amount to be payed");
-            newDebtMap.put(remainingDebt, lowestDebtor);
-            amount = lowestDebtorDebt;
-        } else if (remainingDebt < 0) {
-            logger.debug("Highest debtor still owes money");
-            newDebtMap.put(remainingDebt, highestDebtor);
+            debtMap.put(lowestDebtor, remainingDebt);
             amount = highestDebtorDebt;
+        } else if (remainingDebt.compareTo(BigDecimal.valueOf(0)) < 0) {
+            logger.debug("Highest debtor still owes money");
+            debtMap.put(highestDebtor, remainingDebt);
+            amount = lowestDebtorDebt;
         }
 
-        List<AmountResponse> payments = minimumPayments.get(highestDebtor.getId());
+        List<AmountResponse> payments = minimumPayments.get(highestDebtor);
 
         if (payments == null) {
             payments = new ArrayList<>();
         }
 
-        payments.add(new AmountResponse(lowestDebtor.getId(), amount));
-        minimumPayments.put(highestDebtor.getId(), payments);
+        payments.add(new AmountResponse(lowestDebtor.getId(), amount.abs().floatValue(), lowestDebtor.getName(),
+                lowestDebtor.getSurname()));
+        minimumPayments.put(highestDebtor, payments);
 
-        if (newDebtMap.size() > 0) {
-            return calculateMinimumPayments(newDebtMap, minimumPayments);
+        if (debtMap.size() > 0) {
+            return calculateMinimumPayments(debtMap, minimumPayments);
         } else {
             logger.debug("Minimum payment calculation finished");
             return minimumPayments;
         }
     }
 
-    private List<MinimumPaymentResponse> getMinimumPaymentResponse(Map<String, List<AmountResponse>> minimumPayments) {
+    private List<MinimumPaymentResponse> getMinimumPaymentResponse(Map<Friend, List<AmountResponse>> minimumPayments) {
         List<MinimumPaymentResponse> minimumPaymentResponses = new ArrayList<>();
-        minimumPayments.forEach((key, value) -> minimumPaymentResponses.add(new MinimumPaymentResponse(key, value)));
+        minimumPayments.forEach((key, value) -> minimumPaymentResponses.add(new MinimumPaymentResponse(key.getId(),
+                key.getName(), key.getSurname(), value)));
 
         return minimumPaymentResponses;
+    }
+
+    private Map.Entry<Friend, BigDecimal> getLowestDebtor(Map<Friend, BigDecimal> debtMap) {
+        BigDecimal debt = BigDecimal.valueOf(0);
+        Map.Entry<Friend, BigDecimal> lowestDebtor = null;
+
+        for (Map.Entry<Friend, BigDecimal> entry : debtMap.entrySet()) {
+            if (entry.getValue().compareTo(debt) >= 0) {
+                lowestDebtor = entry;
+                debt = entry.getValue();
+            }
+        }
+
+        return lowestDebtor;
+    }
+
+    private Map.Entry<Friend, BigDecimal> getHighestDebtor(Map<Friend, BigDecimal> debtMap) {
+        BigDecimal debt = BigDecimal.valueOf(0);
+        Map.Entry<Friend, BigDecimal> lowestDebtor = null;
+
+        for (Map.Entry<Friend, BigDecimal> entry : debtMap.entrySet()) {
+            if (entry.getValue().compareTo(debt) <= 0) {
+                lowestDebtor = entry;
+                debt = entry.getValue();
+            }
+        }
+
+        return lowestDebtor;
     }
 }

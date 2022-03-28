@@ -1,9 +1,10 @@
 package com.practice.shared_payment_backend.restservice.models.responses;
 
+import com.practice.shared_payment_backend.restservice.models.common.AbstractJsonBody;
 import com.practice.shared_payment_backend.restservice.models.interfaces.DataResponse;
 import com.practice.shared_payment_backend.restservice.models.interfaces.ErrorResponse;
 
-public class ApiResponse {
+public class ApiResponse extends AbstractJsonBody {
 
     private DataResponse data;
     private ErrorResponse error;
