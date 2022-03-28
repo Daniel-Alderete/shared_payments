@@ -643,6 +643,10 @@ components:
       properties:
         friendId:
           $ref: '#/components/parameters/FriendId'
+        friendName:
+          type: string
+        friendSurname:
+          type: string
         amount:
           type: number
     MinimunPayments:
@@ -651,18 +655,14 @@ components:
       properties:
         friendId:
           $ref: '#/components/parameters/FriendId'
+        friendName:
+          type: string
+        friendSurname:
+          type: string
         payments:
           type: array
           items:
-            $ref: '#/components/schemas/MinimunPayment'
-    MinimunPayment:
-      type: object
-      description: total amounnt of money owed to a friend
-      properties:
-        friendId:
-          $ref: '#/components/parameters/FriendId'
-        payment:
-          type: number
+            $ref: '#/components/schemas/Debt'
         
     
   
