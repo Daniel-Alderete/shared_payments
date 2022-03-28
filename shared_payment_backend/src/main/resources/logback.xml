@@ -5,7 +5,7 @@
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
     <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>${application.home:-.}/logs/application.log</file>
+        <file>${user.home}/application.log</file>
         <encoder>
             <pattern>%d{yyyy-MM-dd_HH:mm:ss.SSS} [%X{RequestId}] [%level] %logger{36}.%M [%L] -
                 %message%n%xException{10}
