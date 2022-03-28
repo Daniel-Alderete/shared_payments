@@ -5,12 +5,14 @@ import com.practice.shared_payment_backend.models.friends.FriendMember;
 import com.practice.shared_payment_backend.models.friends.FriendPayment;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
 import com.practice.shared_payment_backend.restservice.common.BaseController;
+import com.practice.shared_payment_backend.restservice.models.exceptions.BadRequestBodyException;
+import com.practice.shared_payment_backend.restservice.models.exceptions.FriendNotFoundException;
+import com.practice.shared_payment_backend.restservice.models.exceptions.GroupNotFoundException;
+import com.practice.shared_payment_backend.restservice.models.exceptions.PaymentNotFoundException;
 import com.practice.shared_payment_backend.restservice.models.requests.PaymentRequest;
 import com.practice.shared_payment_backend.restservice.models.responses.ApiResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.payment.PaymentListResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.payment.PaymentResponse;
-import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,15 +45,15 @@ public class PaymentController extends BaseController {
                     return new ApiResponse(new PaymentListResponse(response));
                 } else {
                     logger.error("Friend {} was not found in DB", friendId);
-                    throw new EmptyResultDataAccessException(1);
+                    throw new FriendNotFoundException();
                 }
             } else {
                 logger.error("Group {} does not contain friend {}", groupId, friendId);
-                throw new EmptyResultDataAccessException(1);
+                throw new FriendNotFoundException();
             }
         } else {
             logger.error("Group {} was not found in DB", groupId);
-            throw new EmptyResultDataAccessException(1);
+            throw new GroupNotFoundException();
         }
     }
 
@@ -84,19 +86,19 @@ public class PaymentController extends BaseController {
                         return new ApiResponse(new PaymentResponse(payment));
                     } else {
                         logger.error("Friend {} was not found in DB", friendId);
-                        throw new EmptyResultDataAccessException(1);
+                        throw new FriendNotFoundException();
                     }
                 } else {
                     logger.error("Group {} does not contain friend {}", groupId, friendId);
-                    throw new EmptyResultDataAccessException(1);
+                    throw new FriendNotFoundException();
                 }
             } else {
                 logger.error("Group {} was not found in DB", groupId);
-                throw new EmptyResultDataAccessException(1);
+                throw new GroupNotFoundException();
             }
         } else {
             logger.error("Missing at least one parameter in the request");
-            throw new DataRetrievalFailureException("Missing parameter");
+            throw new BadRequestBodyException();
         }
     }
 
@@ -119,23 +121,23 @@ public class PaymentController extends BaseController {
                             return new ApiResponse(new PaymentResponse(payment.get()));
                         } else {
                             logger.error("Payment {} was not found in DB", paymentId);
-                            throw new EmptyResultDataAccessException(1);
+                            throw new PaymentNotFoundException();
                         }
                     } else {
                         logger.error("Friend {} does not contain payment {}", friendId, paymentId);
-                        throw new EmptyResultDataAccessException(1);
+                        throw new PaymentNotFoundException();
                     }
                 } else {
                     logger.error("Friend {} was not found in DB", friendId);
-                    throw new EmptyResultDataAccessException(1);
+                    throw new FriendNotFoundException();
                 }
             } else {
                 logger.error("Group {} does not contain friend {}", groupId, friendId);
-                throw new EmptyResultDataAccessException(1);
+                throw new FriendNotFoundException();
             }
         } else {
             logger.error("Group {} was not found in DB", groupId);
-            throw new EmptyResultDataAccessException(1);
+            throw new GroupNotFoundException();
         }
     }
 
@@ -168,23 +170,23 @@ public class PaymentController extends BaseController {
                             return new ApiResponse(new PaymentResponse(payment));
                         } else {
                             logger.error("Payment {} was not found in DB", paymentId);
-                            throw new EmptyResultDataAccessException(1);
+                            throw new PaymentNotFoundException();
                         }
                     } else {
                         logger.error("Friend {} was not found in DB", friendId);
-                        throw new EmptyResultDataAccessException(1);
+                        throw new FriendNotFoundException();
                     }
                 } else {
                     logger.error("Group {} does not contain friend {}", groupId, friendId);
-                    throw new EmptyResultDataAccessException(1);
+                    throw new FriendNotFoundException();
                 }
             } else {
                 logger.error("Group {} was not found in DB", groupId);
-                throw new EmptyResultDataAccessException(1);
+                throw new GroupNotFoundException();
             }
         } else {
             logger.error("Missing at least one parameter in the request");
-            throw new DataRetrievalFailureException("Missing parameter");
+            throw new BadRequestBodyException();
         }
     }
 
@@ -216,23 +218,23 @@ public class PaymentController extends BaseController {
                             logger.info("Payment {} successfully deleted", paymentId);
                         } else {
                             logger.error("Payment {} was not found in DB", paymentId);
-                            throw new EmptyResultDataAccessException(1);
+                            throw new PaymentNotFoundException();
                         }
                     } else {
                         logger.error("Friend {} does not contain payment {}", friendId, paymentId);
-                        throw new EmptyResultDataAccessException(1);
+                        throw new PaymentNotFoundException();
                     }
                 } else {
                     logger.error("Friend {} was not found in DB", friendId);
-                    throw new EmptyResultDataAccessException(1);
+                    throw new FriendNotFoundException();
                 }
             } else {
                 logger.error("Group {} does not contain friend {}", groupId, friendId);
-                throw new EmptyResultDataAccessException(1);
+                throw new FriendNotFoundException();
             }
         } else {
             logger.error("Group {} was not found in DB", groupId);
-            throw new EmptyResultDataAccessException(1);
+            throw new GroupNotFoundException();
         }
     }
 }

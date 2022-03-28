@@ -5,6 +5,8 @@ import com.practice.shared_payment_backend.models.interfaces.Friend;
 import com.practice.shared_payment_backend.models.interfaces.Group;
 import com.practice.shared_payment_backend.models.interfaces.Payment;
 import com.practice.shared_payment_backend.restservice.common.BaseController;
+import com.practice.shared_payment_backend.restservice.models.exceptions.BadRequestBodyException;
+import com.practice.shared_payment_backend.restservice.models.exceptions.GroupNotFoundException;
 import com.practice.shared_payment_backend.restservice.models.requests.GroupRequest;
 import com.practice.shared_payment_backend.restservice.models.responses.ApiResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.group.GroupListResponse;
@@ -12,8 +14,6 @@ import com.practice.shared_payment_backend.restservice.models.responses.group.Gr
 import com.practice.shared_payment_backend.restservice.models.responses.group.info.AmountResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.group.info.GroupInfoResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.group.info.MinimumPaymentResponse;
-import org.springframework.dao.DataRetrievalFailureException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,7 +61,7 @@ public class GroupController extends BaseController {
 
                 if (newFriendPaymentMap.isEmpty() || request.getFriends().size() != newFriendPaymentMap.size()) {
                     logger.error("At least one friend was not found in the DB {}", request.getFriends());
-                    throw new DataRetrievalFailureException("Friends not found");
+                    throw new BadRequestBodyException();
                 }
             }
 
@@ -80,7 +80,7 @@ public class GroupController extends BaseController {
             return new ApiResponse(new GroupResponse(group, newFriendPaymentMap));
         } else {
             logger.error("Missing at least one parameter in the request");
-            throw new DataRetrievalFailureException("Missing parameter");
+            throw new BadRequestBodyException();
         }
     }
 
@@ -95,7 +95,7 @@ public class GroupController extends BaseController {
                     paymentRepository)));
         } else {
             logger.error("Group {} was not found in DB", groupId);
-            throw new EmptyResultDataAccessException(1);
+            throw new GroupNotFoundException();
         }
     }
 
@@ -126,7 +126,7 @@ public class GroupController extends BaseController {
 
                     if (newFriendPaymentMap.isEmpty() || request.getFriends().size() != newFriendPaymentMap.size()) {
                         logger.error("At least one friend was not found in the DB {}", request.getFriends());
-                        throw new DataRetrievalFailureException("Friends not found");
+                        throw new BadRequestBodyException();
                     }
                 }
 
@@ -148,11 +148,11 @@ public class GroupController extends BaseController {
                 return new ApiResponse(new GroupResponse(group, newFriendPaymentMap));
             } else {
                 logger.error("Group {} was not found in DB", groupId);
-                throw new EmptyResultDataAccessException(1);
+                throw new GroupNotFoundException();
             }
         } else {
             logger.error("Missing at least one parameter in the request");
-            throw new DataRetrievalFailureException("Missing parameter");
+            throw new BadRequestBodyException();
         }
     }
 
@@ -177,7 +177,7 @@ public class GroupController extends BaseController {
             logger.info("Group {} successfully deleted", groupId);
         } else {
             logger.error("Group {} was not found in DB", groupId);
-            throw new EmptyResultDataAccessException(1);
+            throw new GroupNotFoundException();
         }
     }
 
@@ -235,7 +235,7 @@ public class GroupController extends BaseController {
             return new ApiResponse(new GroupInfoResponse(debts, minimumPayment));
         } else {
             logger.error("Group {} was not found in DB", groupId);
-            throw new EmptyResultDataAccessException(1);
+            throw new GroupNotFoundException();
         }
     }
 

@@ -12,6 +12,7 @@ import com.practice.shared_payment_backend.repository.FriendRepository;
 import com.practice.shared_payment_backend.repository.GroupRepository;
 import com.practice.shared_payment_backend.repository.PaymentRepository;
 import com.practice.shared_payment_backend.restservice.models.requests.GroupRequest;
+import com.practice.shared_payment_backend.restservice.models.responses.ApiErrorResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.ApiResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.group.GroupListResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.group.GroupResponse;
@@ -35,6 +36,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.*;
 
+import static com.practice.shared_payment_backend.restservice.FriendControllerTest.RANDOM_NUMBER;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -48,7 +50,6 @@ public class GroupControllerTest {
     private static final String GROUPS_ENDPOINT = "/api/v1/groups";
     private static final String GROUP_ENDPOINT = "/api/v1/groups/%s";
     private static final String GROUP_INFO_ENDPOINT = "/api/v1/groups/%s/info";
-    private static final String RANDOM_NUMBER = "123456";
 
     @Autowired
     private GroupRepository groupRepository;
@@ -147,87 +148,112 @@ public class GroupControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createGroup_EmptyBody_BadRequest() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
+
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content("{}")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createGroup_NullParameters_BadRequest() throws Exception {
         String body = new GroupRequest().toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createGroup_NullName_BadRequest() throws Exception {
         String body = new GroupRequest(null, "Test Description", new HashSet<>()).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createGroup_NullDescription_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", null, new HashSet<>()).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createGroup_NullFriends_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", "Test Description", null).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createGroup_MissingName_BadRequest() throws Exception {
         String body = new GroupRequest(null, "Test Description", new HashSet<>()).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createGroup_MissingDescription_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", null, new HashSet<>()).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createGroup_MissingFriends_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", "Test description", null).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -254,11 +280,14 @@ public class GroupControllerTest {
     public void createGroup_FriendNotFound_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", "Test description",
                 Collections.singleton(RANDOM_NUMBER)).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getGroupsEndpointUrl())
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -341,8 +370,11 @@ public class GroupControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getGroup_GroupNotFound_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(101, "Group not found")).toString();
+
         this.mockMvc.perform(get(getGroupEndpointUrl(RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -398,8 +430,11 @@ public class GroupControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void deleteGroup_GroupNotFound_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(101, "Group not found")).toString();
+
         this.mockMvc.perform(delete(getGroupEndpointUrl(RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -453,87 +488,112 @@ public class GroupControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateGroup_EmptyBody_BadRequest() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
+
         this.mockMvc.perform(put(getGroupEndpointUrl(RANDOM_NUMBER))
                         .content("{}")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateGroup_NullParameters_BadRequest() throws Exception {
         String body = new GroupRequest().toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getGroupEndpointUrl(RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateGroup_NullName_BadRequest() throws Exception {
         String body = new GroupRequest(null, "Test Description", new HashSet<>()).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getGroupEndpointUrl(RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateGroup_NullDescription_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", null, new HashSet<>()).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getGroupEndpointUrl(RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateGroup_NullFriends_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", "Test Description", null).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getGroupEndpointUrl(RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateGroup_MissingName_BadRequest() throws Exception {
         String body = new GroupRequest(null, "Test Description", new HashSet<>()).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getGroupEndpointUrl(RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateGroup_MissingDescription_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", null, new HashSet<>()).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getGroupEndpointUrl(RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updateGroup_MissingFriends_BadRequest() throws Exception {
         String body = new GroupRequest("Test name", "Test description", null).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getGroupEndpointUrl(RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -562,11 +622,14 @@ public class GroupControllerTest {
         Group group = groupRepository.save(new FriendGroup("Test Group", "Test description", new HashSet<>()));
         String body = new GroupRequest("Test name", "Test description",
                 Collections.singleton(RANDOM_NUMBER)).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getGroupEndpointUrl(group.getId()))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -654,8 +717,11 @@ public class GroupControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getGroupInfo_GroupNotFound_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(101, "Group not found")).toString();
+
         this.mockMvc.perform(get(getGroupInfoEndpointUrl(RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test

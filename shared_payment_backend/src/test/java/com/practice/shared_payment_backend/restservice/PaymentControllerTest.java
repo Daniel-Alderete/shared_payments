@@ -11,6 +11,7 @@ import com.practice.shared_payment_backend.repository.FriendRepository;
 import com.practice.shared_payment_backend.repository.GroupRepository;
 import com.practice.shared_payment_backend.repository.PaymentRepository;
 import com.practice.shared_payment_backend.restservice.models.requests.PaymentRequest;
+import com.practice.shared_payment_backend.restservice.models.responses.ApiErrorResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.ApiResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.payment.PaymentListResponse;
 import com.practice.shared_payment_backend.restservice.models.responses.payment.PaymentResponse;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
+import static com.practice.shared_payment_backend.restservice.FriendControllerTest.RANDOM_NUMBER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -42,7 +44,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class PaymentControllerTest {
     private static final String PAYMENTS_ENDPOINT = "/api/v1/groups/%s/friends/%s/payments";
     private static final String PAYMENT_ENDPOINT = "/api/v1/groups/%s/friends/%s/payments/%s";
-    private static final String RANDOM_NUMBER = "123456";
     private static final long NOW = Instant.now(Clock.systemUTC()).getEpochSecond();
     private static Group group;
     private static String groupId;
@@ -92,23 +93,33 @@ public class PaymentControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getAllPayments_GroupNotFound_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(101, "Group not found")).toString();
+
         this.mockMvc.perform(get(getPaymentsEndpointUrl(RANDOM_NUMBER, friendId)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getAllPayments_FriendNotFound_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
+
         this.mockMvc.perform(get(getPaymentsEndpointUrl(groupId, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getAllPayments_FriendNotFoundInDB_NotFound() throws Exception {
         group.setFriends(Collections.singleton(RANDOM_NUMBER));
+        groupRepository.save((FriendGroup) group);
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
+
         this.mockMvc.perform(get(getPaymentsEndpointUrl(groupId, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -132,109 +143,138 @@ public class PaymentControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_EmptyBody_BadRequest() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
+
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, friendId))
                         .content("{}")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_NullParameters_BadRequest() throws Exception {
         String body = new PaymentRequest().toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, friendId))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_NullName_BadRequest() throws Exception {
         String body = new PaymentRequest(null, "Test Description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, friendId))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_NullSurname_BadRequest() throws Exception {
         String body = new PaymentRequest(54.5f, null, NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, friendId))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_NullPayments_BadRequest() throws Exception {
         String body = new PaymentRequest(54.5f, "test description", null).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, friendId))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_MissingName_BadRequest() throws Exception {
         String body = new PaymentRequest(null, "Test description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, friendId))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_MissingSurname_BadRequest() throws Exception {
         String body = new PaymentRequest(54.5f, null, NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, friendId))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_MissingPayments_BadRequest() throws Exception {
         String body = new PaymentRequest(54.5f, "test description", null).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, friendId))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_MissingGroup_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(101, "Group not found")).toString();
         String body = new PaymentRequest(54.5f, "Test description", NOW).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(RANDOM_NUMBER, friendId))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void createPayment_MissingFriend_NotFound() throws Exception {
         String body = new PaymentRequest(54.5f, "Test description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -243,11 +283,13 @@ public class PaymentControllerTest {
         group.setFriends(Collections.singleton(RANDOM_NUMBER));
         groupRepository.save((FriendGroup) group);
         String body = new PaymentRequest(54.5f, "Test description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
 
         this.mockMvc.perform(post(getPaymentsEndpointUrl(groupId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -299,15 +341,20 @@ public class PaymentControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getPayment_GroupNotFound_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(101, "Group not found")).toString();
         this.mockMvc.perform(get(getPaymentEndpointUrl(RANDOM_NUMBER, friendId, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getPayment_FriendNotInGroup_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
+
         this.mockMvc.perform(get(getPaymentEndpointUrl(groupId, RANDOM_NUMBER, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -315,16 +362,21 @@ public class PaymentControllerTest {
     public void getPayment_FriendNotFound_NotFound() throws Exception {
         group.setFriends(Collections.singleton(RANDOM_NUMBER));
         groupRepository.save((FriendGroup) group);
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
 
         this.mockMvc.perform(get(getPaymentEndpointUrl(groupId, RANDOM_NUMBER, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void getPayment_FriendWithoutPayments_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(103, "Payment not found")).toString();
+
         this.mockMvc.perform(get(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -345,15 +397,20 @@ public class PaymentControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void deletePayment_GroupNotFound_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(101, "Group not found")).toString();
         this.mockMvc.perform(delete(getPaymentEndpointUrl(RANDOM_NUMBER, RANDOM_NUMBER, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void deletePayment_FriendNotInGroup_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
+
         this.mockMvc.perform(delete(getPaymentEndpointUrl(groupId, RANDOM_NUMBER, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -361,16 +418,21 @@ public class PaymentControllerTest {
     public void deletePayment_FriendNotFound_NotFound() throws Exception {
         group.setFriends(Collections.singleton(RANDOM_NUMBER));
         groupRepository.save((FriendGroup) group);
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
 
         this.mockMvc.perform(delete(getPaymentEndpointUrl(groupId, RANDOM_NUMBER, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void deletePayment_PaymentNotFound_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(103, "Payment not found")).toString();
+
         this.mockMvc.perform(delete(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -394,109 +456,138 @@ public class PaymentControllerTest {
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_EmptyBody_BadRequest() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
+
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content("{}")
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_NullParameters_BadRequest() throws Exception {
         String body = new PaymentRequest().toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_NullName_BadRequest() throws Exception {
         String body = new PaymentRequest(null, "Test Description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_NullSurname_BadRequest() throws Exception {
         String body = new PaymentRequest(54.5f, null, NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_NullPayments_BadRequest() throws Exception {
         String body = new PaymentRequest(54.5f, "test description", null).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_MissingName_BadRequest() throws Exception {
         String body = new PaymentRequest(null, "Test description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_MissingSurname_BadRequest() throws Exception {
         String body = new PaymentRequest(54.5f, null, NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_MissingPayments_BadRequest() throws Exception {
         String body = new PaymentRequest(54.5f, "test description", null).toString();
+        String result = new ApiResponse(new ApiErrorResponse(104, "Missing at least one parameter in the " +
+                "request")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_MissingGroup_NotFound() throws Exception {
+        String result = new ApiResponse(new ApiErrorResponse(101, "Group not found")).toString();
         String body = new PaymentRequest(54.5f, "Test description", NOW).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(RANDOM_NUMBER, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_FriendNotInGroup_NotFound() throws Exception {
         String body = new PaymentRequest(54.5f, "Test description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, RANDOM_NUMBER, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -505,22 +596,26 @@ public class PaymentControllerTest {
         group.setFriends(Collections.singleton(RANDOM_NUMBER));
         groupRepository.save((FriendGroup) group);
         String body = new PaymentRequest(54.5f, "Test description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(102, "Friend not found")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, RANDOM_NUMBER, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
     @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
     public void updatePayment_MissingPayment_NotFound() throws Exception {
         String body = new PaymentRequest(54.5f, "Test description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(103, "Payment not found")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
@@ -529,11 +624,13 @@ public class PaymentControllerTest {
         friend.setPayments(Collections.singleton(RANDOM_NUMBER));
         friendRepository.save((FriendMember) friend);
         String body = new PaymentRequest(54.5f, "Test description", NOW).toString();
+        String result = new ApiResponse(new ApiErrorResponse(103, "Payment not found")).toString();
 
         this.mockMvc.perform(put(getPaymentEndpointUrl(groupId, friendId, RANDOM_NUMBER))
                         .content(body)
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().json(result));
     }
 
     @Test
