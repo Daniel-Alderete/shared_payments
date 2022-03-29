@@ -1,6 +1,7 @@
 export default interface Payment {
     id: null;
-    amoun: number;
+    amount: number;
     description: string;
     date: number;
   }
+  

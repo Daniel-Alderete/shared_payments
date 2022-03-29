@@ -6,7 +6,22 @@ const routes: Array<RouteRecordRaw> = [
     alias: "/groups",
     name: "groups",
     component: () => import("./components/GroupList.vue"),
-  }
+  },
+  {
+    path: "/groups/:id",
+    name: "group-details",
+    component: () => import("./components/GroupDetail.vue"),
+  },
+  /* {
+    path: "/addfriend",
+    name: "add-friend",
+    component: () => import("./components/AddFriend.vue"),
+  },
+  {
+    path: "/addpayment",
+    name: "add-payment",
+    component: () => import("./components/AddPayment.vue"),
+  } */
 ];
 
 const router = createRouter({

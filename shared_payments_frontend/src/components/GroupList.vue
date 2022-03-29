@@ -1,23 +1,6 @@
 <template>
   <div class="list row">
     <div class="col-md-8">
- <!--     <div class="input-group mb-3">
-        <input
-          type="text"
-          class="form-control"
-          placeholder="Search by title"
-          v-model="title"
-        />
-        <div class="input-group-append">
-          <button
-            class="btn btn-outline-secondary"
-            type="button"
-            @click="searchId"
-          >
-            Search
-          </button>
-        </div>
-      </div>-->
     </div>
     <div class="col-md-6">
       <h4>Groups List</h4>
@@ -32,9 +15,6 @@
           {{ group.name }}
         </li>
       </ul>
-<!--      <button class="m-3 btn btn-sm btn-danger" @click="removeAllGroups">
-        Remove All
-      </button> -->
     </div>
     <div class="col-md-6">
       <div v-if="currentGroup.id">
@@ -49,14 +29,9 @@
           <label><strong>Description:</strong></label>
           {{ currentGroup.description }}
         </div>
-        <div>
-          <label><strong>Friends:</strong></label>
-          {{ currentGroup.friends }}
-        </div>
         <router-link
           :to="'/groups/' + currentGroup.id"
-          class="badge badge-warning"
-          >Edit</router-link
+          >Select Group</router-link
         >
       </div>
       <div v-else>
@@ -69,8 +44,8 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import GroupDataService from "@/services/GroupDataService";
-import Group from "@/types/Group";
-import ResponseData from "@/types/ResponseData";
+import Group from "@/types/models/Group";
+import ResponseData from "@/types/responses/ResponseData";
 export default defineComponent({
   name: "groups-list",
   data() {

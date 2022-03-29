@@ -2,7 +2,6 @@ import apiClient from "@/http-common";
 
 class GroupDataService {
   getAll(): Promise<any> {
-    console.log("Doing an http request");
     return apiClient.get("/groups");
   }
 

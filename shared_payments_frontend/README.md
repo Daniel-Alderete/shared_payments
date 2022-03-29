@@ -1,4 +1,4 @@
-# vue-3-typescript-example
+# shared-payments-backend
 
 ## Project setup
 ```
