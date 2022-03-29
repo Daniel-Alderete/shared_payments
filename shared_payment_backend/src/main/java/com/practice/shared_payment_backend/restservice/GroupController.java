@@ -25,6 +25,7 @@ import static com.practice.shared_payment_backend.repository.utils.FriendUtils.g
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081"})
 public class GroupController extends BaseController {
 
     @GetMapping("/api/{version}/groups")

@@ -24,6 +24,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @RestController
+@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:8081"})
 public class PaymentController extends BaseController {
 
     @GetMapping("/api/{version}/groups/{groupId}/friends/{friendId}/payments")

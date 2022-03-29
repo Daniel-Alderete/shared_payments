@@ -36,6 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         /* TODO: CSRF DISABLED DUE TO LIMITATIONS OF TESTING. THIS SHOULD NOT BE DONE IN PRODUCTION */
         http.csrf().disable();
+        http.cors();
 
         http.authorizeRequests()
                 .antMatchers("/securityNone")

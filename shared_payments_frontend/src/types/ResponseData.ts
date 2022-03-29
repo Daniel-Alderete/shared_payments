@@ -1,3 +1,5 @@
+import ApiResponse from "./ApiResponse";
+
 export default interface ResponseData {
-  data: any;
+  data: ApiResponse;
 }
