@@ -6,6 +6,9 @@
         <li class="nav-item">
           <router-link to="/groups" class="nav-link">Groups</router-link>
         </li>
+        <li class="nav-item">
+          <router-link to="/add-group" class="nav-link">Add Group</router-link>
+        </li>
       </div>
     </nav>
     <div class="container mt-3">

@@ -21,6 +21,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/groups/:id/addpayment',
     name: 'add-payment',
     component: () => import('./components/AddPayment.vue')
+  },
+  {
+    path: '/add-group',
+    name: 'add-group',
+    component: () => import('./components/AddGroup.vue')
   }
 ]
 

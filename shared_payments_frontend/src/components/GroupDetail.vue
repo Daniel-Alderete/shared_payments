@@ -36,8 +36,11 @@
           >
             {{ paymentDisplay.name }}
             {{ paymentDisplay.surname }}
+            <br/>
             {{ paymentDisplay.amount }}€
+            <br/>
             {{ paymentDisplay.description }}
+            <br/>
             {{ paymentDisplay.date }}
           </li>
         </ul>
@@ -54,6 +57,7 @@
           >
             {{ debt.friendName }}
             {{ debt.friendSurname }}
+            <br/>
             {{ debt.amount }}€
           </li>
         </ul>
@@ -79,6 +83,7 @@
                 >
                   {{ payment.friendName }}
                   {{ payment.friendSurname }}
+                  <br/>
                   {{ payment.amount }}€
                 </li>
               </ul>
@@ -100,6 +105,7 @@ import GroupInfoResponse from '@/types/responses/GroupInfoResponse'
 import PaymentDisplay from '@/types/models/PaymentDisplay'
 import Group from '@/types/models/Group'
 import GroupDataService from '@/services/GroupDataService'
+import * as moment from 'moment'
 export default defineComponent({
   name: 'group-list',
   data () {
@@ -116,12 +122,13 @@ export default defineComponent({
         .then((response: ResponseData) => {
           this.currentGroup = response.data.data
           console.log(response.data)
+          const paymentMap = new Map<number, PaymentDisplay>()
 
           this.currentGroup.friends.forEach((friend) => {
             friend.payments.forEach((payment) => {
-              const moment = require('moment')
+              console.log(payment.date)
               const dateFormatted: string = moment
-                .utc(payment.date)
+                .utc(payment.date * 1000)
                 .local()
                 .fromNow()
               console.log(dateFormatted)
@@ -134,9 +141,11 @@ export default defineComponent({
                 date: dateFormatted
               }
 
-              this.paymentsDisplay.push(paymentDisplay)
+              paymentMap.set(payment.date, paymentDisplay)
             }, this)
           }, this)
+
+          this.paymentsDisplay = Array.from(new Map([...paymentMap.entries()].sort()).values()).reverse()
         })
         .catch((e: Error) => {
           console.log(e)
