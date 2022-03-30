@@ -4,4 +4,3 @@ export default interface Payment {
     description: string;
     date: number;
   }
-  

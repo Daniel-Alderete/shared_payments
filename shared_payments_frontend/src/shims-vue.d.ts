@@ -1,4 +1,4 @@
-import VueRouter, { Route } from "vue-router";
+import VueRouter, { Route } from 'vue-router'
 /* eslint-disable */
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'

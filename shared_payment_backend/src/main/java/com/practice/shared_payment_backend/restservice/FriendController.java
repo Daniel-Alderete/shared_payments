@@ -86,6 +86,12 @@ public class FriendController extends BaseController {
                     friendRepository.save((FriendMember) friendToUpdate);
                 });
 
+                logger.trace("Updating group friends list");
+                Set<String> currentFriends = group.get().getFriends();
+                currentFriends.add(friend.getId());
+                group.get().setFriends(currentFriends);
+                groupRepository.save(group.get());
+
                 logger.info("Friend correctly created");
                 return new ApiResponse(new FriendResponse(friend, payments));
             } else {

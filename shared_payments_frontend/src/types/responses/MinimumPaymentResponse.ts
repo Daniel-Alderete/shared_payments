@@ -1,4 +1,4 @@
-import AmountResponse from "./AmountResponse";
+import AmountResponse from './AmountResponse'
 
 export default interface MinimumPaymentResponse {
     friendId: string;

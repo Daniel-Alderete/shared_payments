@@ -1,29 +1,29 @@
-import apiClient from "@/http-common";
+import apiClient from '@/http-common'
 
 class GroupDataService {
-  getAll(): Promise<any> {
-    return apiClient.get("/groups");
+  getAll (): Promise<any> {
+    return apiClient.get('/groups')
   }
 
-  create(data: any): Promise<any> {
-    return apiClient.post("/groups", data);
+  create (data: any): Promise<any> {
+    return apiClient.post('/groups', data)
   }
 
-  get(id: any): Promise<any> {
-    return apiClient.get(`/groups/${id}`);
-  }
-  
-  update(id: any, data: any): Promise<any> {
-    return apiClient.put(`/groups${id}`, data);
+  get (id: any): Promise<any> {
+    return apiClient.get(`/groups/${id}`)
   }
 
-  delete(id: any): Promise<any> {
-    return apiClient.delete(`/groups${id}`);
+  update (id: any, data: any): Promise<any> {
+    return apiClient.put(`/groups${id}`, data)
   }
 
-  getInfo(id: any): Promise<any> {
-    return apiClient.get(`/groups/${id}/info`);
+  delete (id: any): Promise<any> {
+    return apiClient.delete(`/groups${id}`)
+  }
+
+  getInfo (id: any): Promise<any> {
+    return apiClient.get(`/groups/${id}/info`)
   }
 }
 
-export default new GroupDataService();
+export default new GroupDataService()

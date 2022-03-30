@@ -1,4 +1,4 @@
-import Friend from "./Friend";
+import Friend from './Friend'
 
 export default interface Group {
     id: null;

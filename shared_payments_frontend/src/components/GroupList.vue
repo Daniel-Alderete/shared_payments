@@ -42,44 +42,44 @@
   </div>
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
-import GroupDataService from "@/services/GroupDataService";
-import Group from "@/types/models/Group";
-import ResponseData from "@/types/responses/ResponseData";
+import { defineComponent } from 'vue'
+import GroupDataService from '@/services/GroupDataService'
+import Group from '@/types/models/Group'
+import ResponseData from '@/types/responses/ResponseData'
 export default defineComponent({
-  name: "groups-list",
-  data() {
+  name: 'groups-list',
+  data () {
     return {
       groups: [] as Group[],
       currentGroup: {} as Group,
       currentIndex: -1,
-      title: "",
-    };
+      title: ''
+    }
   },
   methods: {
-    retrieveGroups() {
+    retrieveGroups () {
       GroupDataService.getAll()
         .then((response: ResponseData) => {
-          this.groups = response.data.data.groups;
+          this.groups = response.data.data.groups
         })
         .catch((e: Error) => {
-          console.log(e);
-        });
+          console.log(e)
+        })
     },
-    refreshList() {
-      this.retrieveGroups();
-      this.currentGroup = {} as Group;
-      this.currentIndex = -1;
+    refreshList () {
+      this.retrieveGroups()
+      this.currentGroup = {} as Group
+      this.currentIndex = -1
     },
-    setActiveGroup(group: Group, index = -1) {
-      this.currentGroup = group;
-      this.currentIndex = index;
-    },
+    setActiveGroup (group: Group, index = -1) {
+      this.currentGroup = group
+      this.currentIndex = index
+    }
   },
-  mounted() {
-    this.retrieveGroups();
-  },
-});
+  mounted () {
+    this.retrieveGroups()
+  }
+})
 </script>
 <style>
 .list {
