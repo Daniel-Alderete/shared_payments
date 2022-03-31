@@ -1,4 +1,4 @@
-# shared_payments
+# Shared Payments
 ### Description
 An application that calculates the shared payments for a group of friends. 
 It has been implemented with Spring boot for the backend and Vue JS for the frontend.
