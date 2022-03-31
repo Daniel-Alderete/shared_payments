@@ -272,6 +272,12 @@ public class GroupController extends BaseController {
             amount = lowestDebtorDebt;
         }
 
+        if (debtMap.size() == 1) {
+            logger.debug("Only one debtor left, adding its value to minimum payment");
+            debtMap = new HashMap<>();
+            amount = amount.add(remainingDebt);
+        }
+
         List<AmountResponse> payments = minimumPayments.get(highestDebtor);
 
         if (payments == null) {

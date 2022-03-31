@@ -51,7 +51,7 @@ export default defineComponent({
     }
   },
   methods: {
-    saveFriend (id: any) {
+    saveFriend () {
       const data = {
         name: this.friend.name,
         surname: this.friend.surname,

@@ -105,7 +105,7 @@ import GroupInfoResponse from '@/types/responses/GroupInfoResponse'
 import PaymentDisplay from '@/types/models/PaymentDisplay'
 import Group from '@/types/models/Group'
 import GroupDataService from '@/services/GroupDataService'
-import * as moment from 'moment'
+import moment from 'moment'
 export default defineComponent({
   name: 'group-list',
   data () {

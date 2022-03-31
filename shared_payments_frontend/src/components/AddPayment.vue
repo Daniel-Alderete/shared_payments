@@ -84,7 +84,7 @@ export default defineComponent({
     }
   },
   methods: {
-    savePayment (id: any) {
+    savePayment () {
       const data = {
         amount: this.payment.amount,
         description: this.payment.description,
