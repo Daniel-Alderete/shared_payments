@@ -1009,13 +1009,46 @@ public class GroupControllerTest {
         AmountResponse debt3 = new AmountResponse(friend3.getId(), -54.47f, friend3.getName(), friend3.getSurname());
 
         AmountResponse minimumPayment1 = new AmountResponse(friend1.getId(), 45.53f, friend1.getName(), friend1.getSurname());
-        AmountResponse minimumPayment2 = new AmountResponse(friend2.getId(), 8.92f, friend2.getName(), friend2.getSurname());
+        AmountResponse minimumPayment2 = new AmountResponse(friend2.getId(), 8.94f, friend2.getName(), friend2.getSurname());
 
         MinimumPaymentResponse minimumPaymentResponse2 = new MinimumPaymentResponse(friend3.getId(), friend3.getName(),
                 friend3.getSurname(), Arrays.asList(minimumPayment1, minimumPayment2));
 
         String result = new ApiResponse(new GroupInfoResponse(Arrays.asList(debt1, debt2, debt3),
                 Collections.singletonList(minimumPaymentResponse2))).toString();
+
+        this.mockMvc.perform(get(getGroupInfoEndpointUrl(group.getId())))
+                .andExpect(status().isOk())
+                .andExpect(content().json(result));
+    }
+
+    @Test
+    @WithMockUser(username = "test-client", password = "test-password", roles = "USER")
+    public void getGroupInfo_GroupWithFriendsWithExpenses6_Ok() throws Exception {
+        Payment payment1 = paymentRepository.save(new FriendPayment(100.0f, "Cena",
+                Instant.now(Clock.systemUTC()).getEpochSecond()));
+        Friend friend1 = friendRepository.save(new FriendMember("Francisco", "Buyo",
+                Collections.singleton(payment1.getId())));
+
+        Payment payment2 = paymentRepository.save(new FriendPayment(100.0f, "Taxi",
+                Instant.now(Clock.systemUTC()).getEpochSecond()));
+        Friend friend2 = friendRepository.save(new FriendMember("Alfonso", "Pérez",
+                new HashSet<>(Collections.singletonList(payment2.getId()))));
+
+        Payment payment3 = paymentRepository.save(new FriendPayment(100.0f, "Compra",
+                Instant.now(Clock.systemUTC()).getEpochSecond()));
+        Friend friend3 = friendRepository.save(new FriendMember("Raúl", "González",
+                new HashSet<>(Collections.singletonList(payment3.getId()))));
+
+        Group group = groupRepository.save(new FriendGroup("Test Group", "Test description",
+                new HashSet<>(Arrays.asList(friend1.getId(), friend2.getId(), friend3.getId()))));
+
+        AmountResponse debt1 = new AmountResponse(friend1.getId(), 0.0f, friend1.getName(), friend1.getSurname());
+        AmountResponse debt2 = new AmountResponse(friend2.getId(), 0.0f, friend2.getName(), friend2.getSurname());
+        AmountResponse debt3 = new AmountResponse(friend3.getId(), 0.0f, friend3.getName(), friend3.getSurname());
+
+        String result = new ApiResponse(new GroupInfoResponse(Arrays.asList(debt1, debt2, debt3),
+                new ArrayList<>())).toString();
 
         this.mockMvc.perform(get(getGroupInfoEndpointUrl(group.getId())))
                 .andExpect(status().isOk())

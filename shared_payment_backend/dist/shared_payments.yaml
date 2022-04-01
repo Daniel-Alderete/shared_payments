@@ -6,7 +6,7 @@ info:
     name: API Support
     email: daniel.alderetecillero@gmail.com
 servers:
-  - url: 'http://localhost:8080/api/1.0.0'
+  - url: 'http://localhost:8080/api/v1'
     description: Localhost (dev) server
 tags:
   - name: Groups
@@ -22,6 +22,10 @@ paths:
         - Groups
       summary: Gets all groups found in DB
       operationId: getAllGroups
+      parameters:
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '200':
           description: OK
@@ -38,6 +42,10 @@ paths:
         - Groups
       summary: Creates a new group in the DB
       operationId: createGroup
+      parameters:
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       requestBody:
         $ref: '#/components/requestBodies/GroupCreation'
       responses:
@@ -61,6 +69,9 @@ paths:
       operationId: getGroup
       parameters:
         - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '200':
           description: OK
@@ -81,6 +92,8 @@ paths:
       operationId: updateGroup
       parameters:
         - $ref: '#/components/parameters/GroupId'
+      security:
+        - basic: []
       requestBody:
         $ref: '#/components/requestBodies/GroupUpdate'
       responses:
@@ -103,6 +116,9 @@ paths:
       operationId: deleteGroup
       parameters:
         - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '204':
           description: OK
@@ -120,6 +136,9 @@ paths:
       operationId: getGroupInfo
       parameters:
         - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '200':
           description: OK
@@ -141,6 +160,9 @@ paths:
       operationId: getAllFriends
       parameters:
         - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '200':
           description: OK
@@ -161,6 +183,9 @@ paths:
       operationId: createFriend
       parameters:
         - $ref: '#/components/parameters/GroupId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       requestBody:
         $ref: '#/components/requestBodies/FriendCreation'
       responses:
@@ -187,6 +212,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '200':
           description: OK
@@ -208,6 +236,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       requestBody:
         $ref: '#/components/requestBodies/FriendUpdate'
       responses:
@@ -231,6 +262,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '204':
           description: OK
@@ -249,6 +283,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '200':
           description: OK
@@ -270,6 +307,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       requestBody:
         $ref: '#/components/requestBodies/PaymentCreation'
       responses:
@@ -297,6 +337,9 @@ paths:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
         - $ref: '#/components/parameters/PaymentId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '200':
           description: OK
@@ -319,6 +362,9 @@ paths:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
         - $ref: '#/components/parameters/PaymentId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       requestBody:
         $ref: '#/components/requestBodies/PaymentUpdate'
       responses:
@@ -343,6 +389,9 @@ paths:
         - $ref: '#/components/parameters/GroupId'
         - $ref: '#/components/parameters/FriendId'
         - $ref: '#/components/parameters/PaymentId'
+        - $ref: '#/components/parameters/XCorrelator'
+      security:
+        - basic: []
       responses:
         '204':
           description: OK
@@ -375,6 +424,13 @@ components:
       description: Identifier of a payment
       schema:
         type: string
+    XCorrelator:
+      name: X-Correlator-Id
+      in: header
+      required: false
+      description: Correlates HTTP requests between a client and server.
+      schema:
+        type: string
   responses:
     ThirdPartyError:
       description: >
@@ -384,6 +440,10 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/MoreThanOneErrorResponse'
+  securitySchemes:
+    basic:
+      type: http
+      scheme: basic          
   requestBodies:
     PaymentCreation:
       content:

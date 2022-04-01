@@ -206,6 +206,7 @@ public class GroupController extends BaseController {
                 }
 
                 logger.debug("Group {} total expenses are {}", groupId, totalExpenses);
+                boolean zeroDebt = false;
 
                 if (totalExpenses.compareTo(BigDecimal.valueOf(0)) > 0) {
                     BigDecimal sharedExpenses = totalExpenses.divide(BigDecimal.valueOf(totalFriends), 2, RoundingMode.HALF_EVEN);
@@ -219,13 +220,21 @@ public class GroupController extends BaseController {
 
                         BigDecimal debt = friendExpenses.subtract(sharedExpenses);
 
+                        if (debt.compareTo(BigDecimal.valueOf(0)) == 0) {
+                            zeroDebt = true;
+                        }
+
                         logger.info("Friend {} has a debt of {}", entry.getKey().getId(), debt);
                         debtMap.put(entry.getKey(), debt);
                         debts.add(new AmountResponse(entry.getKey().getId(), debt.floatValue(), entry.getKey().getName(),
                                 entry.getKey().getSurname()));
                     }
 
-                    minimumPayment = getMinimumPaymentResponse(calculateMinimumPayments(debtMap, new HashMap<>()));
+                    if (!zeroDebt) {
+                        minimumPayment = getMinimumPaymentResponse(calculateMinimumPayments(debtMap, new HashMap<>()));
+                    } else {
+                        logger.info("Debts cancelled between members of group, no need to calculate minimum payments");
+                    }
                 } else {
                     logger.info("Group {} has no expenses", groupId);
                 }
@@ -275,7 +284,7 @@ public class GroupController extends BaseController {
         if (debtMap.size() == 1) {
             logger.debug("Only one debtor left, adding its value to minimum payment");
             debtMap = new HashMap<>();
-            amount = amount.add(remainingDebt);
+            amount = amount.add(remainingDebt.abs());
         }
 
         List<AmountResponse> payments = minimumPayments.get(highestDebtor);
